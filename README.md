@@ -1,4 +1,4 @@
-# PeerLendingLibrary-IT342-G02-Group5
+# Peer Lending Library
 Peer Lending Library Web Portal is an online platform that allows users to lend and borrow books directly from one another, promoting knowledge sharing, community interaction, and better use of personal book collections through a secure and easy-to-use system.
 
 ## 💻 Stack Used
