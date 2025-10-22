@@ -8,7 +8,7 @@ Database: MySQL
 Version Control: Git & GitHub
 
 ## 👥 Team Members
-      Bebiro, Ryan –  ryan.bebiro@cit.edu
-			Dinapo, Nash -	alexandreinash.dinapo@cit.edu
-			Azcona, Jeffer – jeffer.azcona@cit.edu
-			Sagaral, Earl Jericho - earljericho.sagaral@cit.edu
+    Bebiro, Ryan –  ryan.bebiro@cit.edu
+	Dinapo, Nash -	alexandreinash.dinapo@cit.edu
+	Azcona, Jeffer – jeffer.azcona@cit.edu
+	Sagaral, Earl Jericho - earljericho.sagaral@cit.edu
