@@ -3,8 +3,11 @@ Peer Lending Library Web Portal is an online platform that allows users to lend 
 
 ## 💻 Stack Used
 Frontend: HTML, CSS, JavaScript (React)
+
 Backend: Node.js
+
 Database: MySQL
+
 Version Control: Git & GitHub
 
 ## 👥 Team Members
