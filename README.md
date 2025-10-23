@@ -15,6 +15,7 @@ Version Control: Git & GitHub
 # Setup & Run Instructions
 
 Setup the Backend (Spring Boot + MySQL)
+
 Step 1: Create the Spring Boot project
 
 Use Spring Initializr:
