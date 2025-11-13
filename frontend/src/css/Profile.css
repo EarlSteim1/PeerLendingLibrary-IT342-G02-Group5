@@ -1,0 +1,123 @@
+/* --- Profile Specific Styles --- */
+
+.profile-content {
+    padding: 40px 50px;
+    flex-grow: 1;
+    background-color: var(--secondary-bg);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+}
+
+.user-profile-picture {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--primary-green);
+}
+
+.profile-header h2 {
+    font-size: 2em;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+.header-info .joined-date {
+    font-size: 0.95em;
+    color: var(--text-medium);
+    margin-top: 5px;
+}
+
+.profile-details-card {
+    background-color: #fff;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+    padding: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.profile-details-card h3 {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: var(--text-dark);
+    text-align: left;
+}
+
+.detail-item {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--secondary-bg); 
+    padding-bottom: 15px;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+    margin-bottom: 30px; 
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    width: 120px; 
+    flex-shrink: 0;
+}
+
+.detail-value {
+    color: var(--text-medium);
+    flex-grow: 1;
+}
+
+/* --- Styles for Edit Mode Input Fields --- */
+.detail-input {
+    flex-grow: 1;
+    border: 1px solid var(--border-color); 
+    border-radius: var(--border-radius-small);
+    padding: 5px 10px;
+    font-size: 1em;
+    color: var(--text-dark);
+}
+/* --- End of Edit Mode Styles --- */
+
+
+.edit-profile-btn {
+    background-color: var(--button-blue);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    font-weight: 600;
+    width: auto; 
+    display: block; 
+    margin-top: 20px;
+    margin-left: auto; 
+    margin-right: auto; 
+    transition: background-color 0.3s;
+}
+
+.edit-profile-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Style for the Save button when editing */
+.save-btn {
+    background-color: var(--primary-green);
+}
+
+.save-btn:hover {
+    background-color: #27ae60; 
+}

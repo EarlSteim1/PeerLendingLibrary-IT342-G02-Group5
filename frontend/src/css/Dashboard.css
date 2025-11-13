@@ -1,0 +1,243 @@
+/* --- Dashboard Specific Styles --- */
+
+.dashboard-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* Resetting alignment from global.css for full-width layout */
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+}
+
+/* --- Navigation Bar --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.logo-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-nav img {
+    width: 30px;
+    height: 30px;
+}
+
+.logo-nav h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+/* --- Dashboard Specific Styles --- */
+
+/* ... (Styles before nav-links remain the same) ... */
+
+.nav-links {
+    display: flex; 
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-medium);
+    margin-left: 25px; 
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+/* Updated Styles for the Log Out button */
+.nav-action-btn {
+    /* Resetting the boxy button look */
+    background: none; 
+    border: none;
+    color: #e74c3c; /* Red text for log out/danger action */
+    
+    /* Making it behave like a link */
+    padding: 0; /* Remove vertical padding */
+    padding-bottom: 2px; /* Small pad for hover effect */
+    margin-left: 30px; /* Spacing from Profile link */
+    
+    font-size: 1em; /* Standard text size */
+    font-weight: 500;
+    cursor: pointer;
+    width: auto;
+    
+    /* Removing border and box styling */
+    border-radius: 0;
+    transition: color 0.2s, border-bottom 0.2s;
+}
+
+.nav-action-btn:hover {
+    background: none; 
+    color: #c0392b; 
+    /* Add a subtle underline/border effect on hover */
+    border-bottom: 2px solid #c0392b; 
+}
+
+.nav-links a:hover {
+    color: var(--primary-green);
+}
+
+.nav-links .active-link {
+    color: var(--primary-green);
+    border-bottom: 2px solid var(--primary-green);
+    padding-bottom: 15px;
+}
+/* ... (Rest of the Dashboard.css remains the same) ... */
+
+/* --- Main Content Layout --- */
+.dashboard-content {
+    padding: 40px 50px;
+    flex-grow: 1;
+    background-color: var(--secondary-bg);
+}
+
+.welcome-header {
+    font-size: 1.5em;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: var(--text-medium);
+}
+
+/* --- Stat Cards Grid --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background-color: #fff;
+    border-radius: var(--border-radius-large);
+    padding: 25px;
+    box-shadow: var(--shadow);
+    position: relative;
+    color: white; /* Text color for cards */
+}
+
+.stat-card h3 {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.stat-number {
+    font-size: 2.5em;
+    font-weight: 700;
+    margin: 0;
+}
+
+.card-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 2em;
+    opacity: 0.2;
+}
+
+/* Card Colors (matching image: Books Lent (Teal/Green), Books Borrowed (Light Green), Pending (Orange)) */
+.lent-card { background-color: #58c9b9; } /* Teal/Green */
+.borrowed-card { background-color: #8ed6af; } /* Light Green */
+.pending-card { background-color: #ffb884; } /* Orange */
+
+
+/* --- Bottom Section: Find Books & Activity --- */
+.bottom-section {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start; /* Aligns content to the top */
+}
+
+.find-books-panel {
+    flex: 1.5; /* Takes up more space */
+    background-color: #fff;
+    padding: 25px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+}
+
+.activity-panel {
+    flex: 1; /* Takes up less space */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.find-books-panel h3, .activity-panel h3 {
+    color: var(--text-dark);
+    font-size: 1.3em;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.search-group {
+    display: flex;
+    gap: 10px;
+}
+
+.search-group input {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+}
+
+.search-group button {
+    width: auto;
+    padding: 12px 25px;
+    font-weight: 500;
+}
+
+/* Activity and My Books Boxes */
+.recent-activity-box, .my-books-box {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+}
+
+.recent-activity-box p, .my-books-box p {
+    margin: 10px 0;
+    color: var(--text-medium);
+    font-size: 15px;
+}
+
+.activity-detail {
+    font-style: italic;
+    color: var(--text-medium);
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    margin-top: 15px;
+}
+
+.my-books-box p {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--secondary-bg);
+}
+
+.my-books-box p:last-of-type {
+    border-bottom: none;
+    margin-bottom: 20px;
+}
+
+.add-book-btn {
+    background-color: var(--primary-green);
+    color: white;
+    font-weight: 500;
+}
