@@ -1,0 +1,109 @@
+/* --- MyBooks Specific Styles (Based on image_f0058f.png) --- */
+
+.mybooks-content {
+    padding: 40px 50px;
+    flex-grow: 1;
+    background-color: var(--secondary-bg);
+}
+
+.books-container {
+    background-color: #fff;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+    padding: 30px;
+}
+
+/* --- Tab Navigation Styling --- */
+.tabs-header {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    padding-bottom: 5px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-medium);
+    font-size: 1em;
+    font-weight: 500;
+    padding: 10px 20px;
+    margin-right: 15px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    width: auto; /* Override global button style */
+}
+
+.tab-btn:hover {
+    color: var(--text-dark);
+}
+
+.tab-btn.active {
+    color: var(--button-blue);
+    border-bottom: 3px solid var(--button-blue);
+    font-weight: 600;
+}
+
+/* --- Table Styling --- */
+.books-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.books-table th {
+    color: var(--text-medium);
+    font-weight: 500;
+    padding: 15px 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.books-table td {
+    padding: 15px 10px;
+    color: var(--text-dark);
+    font-size: 15px;
+    border-bottom: 1px solid #f7faff; /* Light separator */
+}
+
+.books-table tbody tr:hover {
+    background-color: var(--secondary-bg);
+}
+
+/* --- Action Buttons and Status Tags --- */
+.actions-cell {
+    text-align: right;
+    width: 25%;
+}
+
+.action-btn {
+    padding: 8px 15px;
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-left: 10px;
+    width: auto;
+    transition: opacity 0.2s;
+}
+
+.approve-btn {
+    background-color: var(--primary-green);
+}
+
+.decline-btn {
+    background-color: #e74c3c; /* Red for decline */
+}
+
+/* Status Tag for borrowed books */
+.status-tag {
+    padding: 5px 10px;
+    border-radius: var(--border-radius-small);
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    color: white;
+}
+
+.status-tag.onloan {
+    background-color: #3498db; /* Blue */
+}
