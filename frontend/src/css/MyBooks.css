@@ -83,6 +83,9 @@
     margin-left: 10px;
     width: auto;
     transition: opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .approve-btn {
@@ -91,6 +94,27 @@
 
 .decline-btn {
     background-color: #e74c3c; /* Red for decline */
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.button-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: buttonSpin 0.8s linear infinite;
+}
+
+@keyframes buttonSpin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Status Tag for borrowed books */
@@ -106,4 +130,47 @@
 
 .status-tag.onloan {
     background-color: #3498db; /* Blue */
+}
+
+.status-tag.available {
+    background-color: var(--primary-green); /* Green */
+}
+
+.status-tag.pending {
+    background-color: #ffb884; /* Orange */
+}
+
+/* Edit/Delete Modal Styling */
+.danger-btn {
+    background-color: #e74c3c;
+}
+
+.danger-btn:hover:not(:disabled) {
+    background-color: #c0392b;
+}
+
+.confirm-modal p {
+    color: var(--text-medium);
+    margin: 10px 0 0 0;
+}
+
+/* Make public books panel scrollable when many items exist */
+.public-books-panel {
+    margin-bottom: 20px;
+    max-height: 360px; /* adjust as needed */
+    overflow: auto;
+}
+
+/* Make tab panel scrollable so large lists don't expand the page too much */
+.tab-panel {
+    max-height: 420px;
+    overflow: auto;
+}
+
+/* Keep table headers visible while scrolling */
+.books-table thead th {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
 }

@@ -8,7 +8,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import MyBooks from "./pages/MyBooks"; // <-- 1. Import MyBooks.js
+import MyBooks from "./pages/MyBooks";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -16,9 +17,30 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/mybooks" element={<MyBooks />} /> {/* <-- 2. Add the new Route */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/mybooks" 
+          element={
+            <ProtectedRoute>
+              <MyBooks />
+            </ProtectedRoute>
+          } 
+        />
         {/* Fallback Route */}
         <Route path="*" element={<div className="card-container"><h2>404</h2><p>Page Not Found</p><Link to="/">Go Home</Link></div>} />
       </Routes>

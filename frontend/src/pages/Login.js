@@ -1,16 +1,38 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Toast from "../components/Toast";
+import StorageService from "../utils/storage";
 import "../css/global.css";
 import "../css/Login.css"; 
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
   const navigate = useNavigate();
+
+  const showToastNotification = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   const handleStandardSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!username.trim()) {
+      showToastNotification("Please enter your username", "error");
+      return;
+    }
+
+    if (!password.trim()) {
+      showToastNotification("Please enter your password", "error");
+      return;
+    }
+
     setLoading(true);
 
     // ⚡️ SIMULATION: Replace this block with your actual API call
@@ -22,24 +44,52 @@ function Login() {
         // For now, we assume success:
         console.log(`Login attempt successful for user: ${username}`);
         
+        // Set user session
+        StorageService.setUserSession(username);
+        
+        // Initialize default profile if not exists
+        const existingProfile = StorageService.getUserProfile();
+        if (!existingProfile) {
+          StorageService.saveUserProfile({
+            fullName: username.charAt(0).toUpperCase() + username.slice(1),
+            email: `${username}@example.com`,
+            location: "Philippines",
+            bio: "Welcome to Peer Reads!",
+            joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+            profilePicture: "https://via.placeholder.com/120/ADD8E6/000000?text=👤",
+          });
+        }
+        
+        showToastNotification("Login successful! Welcome back.", "success");
+        
         // Redirect to the dashboard
-        navigate("/dashboard"); 
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 800);
 
     } catch (error) {
         // Handle network errors or unexpected issues
         console.error("Login Error:", error);
-        alert("An error occurred during login. Please try again.");
+        showToastNotification("An error occurred during login. Please try again.", "error");
     } finally {
         setLoading(false);
     }
   };
   
   const handleGoogleLogin = () => {
-      alert("Redirecting to Google login (feature coming soon)");
+      showToastNotification("Google login feature coming soon!", "info");
   };
 
   return (
     <div className="centered-page-wrapper">
+      {/* Toast Notification */}
+      <Toast 
+        message={toastMessage} 
+        type={toastType} 
+        show={showToast} 
+        onClose={() => setShowToast(false)} 
+      />
+      
         <div className="login-container">
           
           {/* LEFT SIDE: Login Illustration */}
