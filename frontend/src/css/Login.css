@@ -212,5 +212,31 @@ button:hover {
     text-decoration: underline;
 }
 
+/* Error Styling */
+.input-error {
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.3) !important;
+}
+
+.error-message {
+    display: block;
+    color: #e74c3c;
+    font-size: 0.85em;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+button:disabled:hover {
+    background-color: var(--button-blue);
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+    transform: none;
+}
+
 /* --- Responsive Layout (Unchanged) --- */
 /* ... (Existing responsive styles remain the same) ... */
