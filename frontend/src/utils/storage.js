@@ -4,6 +4,7 @@ const STORAGE_KEYS = {
   USER_PROFILE: "peerReads:userProfile",
   USER_SESSION: "peerReads:userSession",
   BORROWING_BOOKS: "peerReads:borrowingBooks",
+  USERS: "peerReads:users",
 };
 
 export const StorageService = {
@@ -72,6 +73,55 @@ export const StorageService = {
     } catch (error) {
       console.error("Error saving user profile:", error);
     }
+  },
+
+  // Multi-user accounts (simple localStorage-based user store)
+  getUsers: () => {
+    try {
+      const users = localStorage.getItem(STORAGE_KEYS.USERS);
+      return users ? JSON.parse(users) : [];
+    } catch (error) {
+      console.error("Error loading users:", error);
+      return [];
+    }
+  },
+
+  saveUsers: (users) => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    } catch (error) {
+      console.error("Error saving users:", error);
+    }
+  },
+
+  addUser: (user) => {
+    const users = StorageService.getUsers();
+    // prevent duplicate by email
+    const exists = users.find(u => u.email === user.email);
+    if (exists) return null;
+    const newUser = {
+      id: Date.now(),
+      username: user.username || user.email,
+      email: user.email,
+      password: user.password, // NOTE: plaintext for demo only
+      fullName: user.fullName,
+      profile: user.profile || {},
+    };
+    users.push(newUser);
+    StorageService.saveUsers(users);
+    return newUser;
+  },
+
+  getUserByCredential: (credential) => {
+    const users = StorageService.getUsers();
+    if (!credential) return null;
+    return users.find(u => u.email === credential || u.username === credential || u.fullName === credential) || null;
+  },
+
+  validateUserPassword: (credential, password) => {
+    const user = StorageService.getUserByCredential(credential);
+    if (!user) return false;
+    return user.password === password;
   },
 
   // Session Management

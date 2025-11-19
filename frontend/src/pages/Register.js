@@ -84,18 +84,31 @@ function Register() {
       
       console.log("Registering:", formData);
       
-      // Set user session
-      StorageService.setUserSession(formData.name.trim());
-      
-      // Save user profile
-      StorageService.saveUserProfile({
-        fullName: formData.name.trim(),
+      // Create user account (store users list) and save profile
+      const created = StorageService.addUser({
+        username: formData.email.trim(),
         email: formData.email.trim(),
-        location: "Philippines",
-        bio: "Welcome to Peer Reads!",
-        joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-        profilePicture: "https://via.placeholder.com/120/ADD8E6/000000?text=👤",
+        password: formData.password,
+        fullName: formData.name.trim(),
+        profile: {
+          fullName: formData.name.trim(),
+          email: formData.email.trim(),
+          location: "Philippines",
+          bio: "Welcome to Peer Reads!",
+          joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          profilePicture: "https://via.placeholder.com/120/ADD8E6/000000?text=👤",
+        }
       });
+
+      if (!created) {
+        showToastNotification('An account with that email already exists.', 'error');
+        setLoading(false);
+        return;
+      }
+
+      // Set session for the newly created user
+      StorageService.setUserSession(created.username);
+      StorageService.saveUserProfile(created.profile);
       
       showToastNotification(`Registration successful! Welcome, ${formData.name}!`, "success");
       

@@ -40,32 +40,30 @@ function Login() {
         // Simulating network delay for backend processing
         await new Promise(resolve => setTimeout(resolve, 1500)); 
 
-        // In a real app, you'd check API response for success/failure
-        // For now, we assume success:
-        console.log(`Login attempt successful for user: ${username}`);
-        
-        // Set user session
-        StorageService.setUserSession(username);
-        
-        // Initialize default profile if not exists
-        const existingProfile = StorageService.getUserProfile();
-        if (!existingProfile) {
-          StorageService.saveUserProfile({
-            fullName: username.charAt(0).toUpperCase() + username.slice(1),
-            email: `${username}@example.com`,
-            location: "Philippines",
-            bio: "Welcome to Peer Reads!",
-            joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-            profilePicture: "https://via.placeholder.com/120/ADD8E6/000000?text=👤",
-          });
-        }
-        
-        showToastNotification("Login successful! Welcome back.", "success");
-        
-        // Redirect to the dashboard
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 800);
+            // Validate user against stored users
+            const user = StorageService.getUserByCredential(username.trim());
+            if (!user) {
+              showToastNotification('Account not found. Please register first.', 'error');
+              setLoading(false);
+              return;
+            }
+
+            const valid = StorageService.validateUserPassword(username.trim(), password);
+            if (!valid) {
+              showToastNotification('Invalid credentials. Please check your username/email and password.', 'error');
+              setLoading(false);
+              return;
+            }
+
+            // Successful login: set session and profile from stored user
+            StorageService.setUserSession(user.username);
+            StorageService.saveUserProfile(user.profile || { fullName: user.fullName, email: user.email });
+
+            showToastNotification('Login successful! Welcome back.', 'success');
+            // Redirect to the dashboard
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 800);
 
     } catch (error) {
         // Handle network errors or unexpected issues
