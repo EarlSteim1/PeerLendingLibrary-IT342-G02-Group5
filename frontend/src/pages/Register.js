@@ -12,6 +12,7 @@ function Register() {
     confirmEmail: "",
     password: "",
     confirmPassword: "",
+    role: 'user',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -90,9 +91,11 @@ function Register() {
         email: formData.email.trim(),
         password: formData.password,
         fullName: formData.name.trim(),
+        role: formData.role || 'user',
         profile: {
           fullName: formData.name.trim(),
           email: formData.email.trim(),
+          role: formData.role || 'user',
           location: "Philippines",
           bio: "Welcome to Peer Reads!",
           joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
@@ -168,6 +171,18 @@ function Register() {
                       className={errors.name ? 'input-error' : ''}
                     />
                     {errors.name && <span className="error-message">{errors.name}</span>}
+                </div>
+                {/* Role selection */}
+                <div className="input-group" style={{marginTop: '6px'}}>
+                  <label style={{fontSize: '13px', color: 'var(--text-medium)', marginBottom: '6px'}}>Register as</label>
+                  <div style={{display: 'flex', gap: '12px'}}>
+                    <label style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                      <input type="radio" name="role" value="user" checked={formData.role === 'user'} onChange={handleChange} disabled={loading} /> User
+                    </label>
+                    <label style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                      <input type="radio" name="role" value="admin" checked={formData.role === 'admin'} onChange={handleChange} disabled={loading} /> Admin
+                    </label>
+                  </div>
                 </div>
                 
                 {/* Email */}

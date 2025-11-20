@@ -72,8 +72,17 @@ function Dashboard() {
     }
   };
 
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
   const handleAddBook = async (e) => {
     e.preventDefault();
+    // Only admins may add books
+    if (userProfile?.role !== 'admin') {
+      showToastNotification('Only administrators may add books.', 'error');
+      return;
+    }
     if (newBook.title && newBook.author) {
       setIsAddingBook(true);
       
@@ -116,6 +125,10 @@ function Dashboard() {
   };
 
   const openAddBookModal = () => {
+    if (userProfile?.role !== 'admin') {
+      showToastNotification('Only administrators may add books.', 'error');
+      return;
+    }
     setShowAddBookModal(true);
   };
 
@@ -192,14 +205,21 @@ function Dashboard() {
           {/* Left Column: Find Books */}
           <div className="find-books-panel">
             <h3>Find Books</h3>
-            <form className="search-group" onSubmit={handleSearch}>
-              <input 
-                type="text" 
-                placeholder="Search by title, author, or ISBN" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button type="submit">Search</button>
+            <form className="search-group" onSubmit={handleSearch} aria-label="Search books">
+              <div className="search-box">
+                <span className="search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  placeholder="Search books, authors or ISBN"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search books"
+                />
+                {searchQuery && (
+                  <button type="button" className="clear-btn" onClick={clearSearch} aria-label="Clear search">✕</button>
+                )}
+              </div>
+              <button type="submit" className="search-submit">Search</button>
             </form>
           </div>
           
@@ -240,7 +260,13 @@ function Dashboard() {
                   View all {books.length} books →
                 </p>
               )}
-              <button className="add-book-btn" onClick={openAddBookModal}>+ Add a New Book</button>
+              {userProfile?.role === 'admin' ? (
+                <button className="add-book-btn" onClick={openAddBookModal}>+ Add a New Book</button>
+              ) : (
+                <p style={{color: 'var(--text-medium)', fontSize: '13px', marginTop: '12px'}}>
+                  Only administrators can add new books. To borrow, use the <strong>Find Books</strong> panel.
+                </p>
+              )}
             </div>
           </div>
         </div>
