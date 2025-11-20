@@ -20,8 +20,13 @@ const BookItem = ({
   isProcessing,
   processingType
 }) => (
-  <tr className="book-row">
-    <td>{title}</td>
+  <tr className={`book-row ${status === 'pending' ? 'pending' : ''}`}>
+    <td>
+      {title}
+      {status === 'pending' && (
+        <span className="pending-badge">Pending</span>
+      )}
+    </td>
     <td>{borrower || '-'}</td>
     <td>{dateRequested || dateAdded || '-'}</td>
     <td className="actions-cell">
@@ -123,11 +128,13 @@ function MyBooks() {
   // Pending requests that are relevant to the current user (admin): only requests for books they own
   const pendingRequests = lendingBooks.filter(book => book.status === 'pending' && (userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username)));
 
-  // Books I'm Lending: show only books owned by current user that are actually on loan
-  const lendingDisplay = userProfile ? lendingBooks.filter(book => (book.owner === userProfile.fullName || book.owner === userProfile.username) && book.status === 'onloan') : [];
+  // Books I'm Lending: show books owned by current user that are on loan or pending
+  // (include pending here so owners can approve requests directly from this tab)
+  const lendingDisplay = userProfile ? lendingBooks.filter(book => (book.owner === userProfile.fullName || book.owner === userProfile.username) && (book.status === 'onloan' || book.status === 'pending')) : [];
 
   // Public Books list: all available books (users can request these)
-  const publicBooks = lendingBooks.filter(book => book.status === 'available');
+  // Include pending so public panel shows requested books with a badge (requester still visible)
+  const publicBooks = lendingBooks.filter(book => book.status === 'available' || book.status === 'pending');
   const visiblePublicBooks = publicQuery && activeTab === 'books'
     ? publicBooks.filter(book => {
         const q = publicQuery.trim().toLowerCase();
@@ -229,13 +236,16 @@ function MyBooks() {
       const book = lendingBooks.find(b => b.id === bookId);
       if (!book) return;
 
-      // Update in storage
-      StorageService.updateLendingBook(bookId, { status: "onloan" });
-      
+      // Update in storage: mark as on loan and record borrowed date
+      const today = new Date().toISOString().split('T')[0];
+      StorageService.updateLendingBook(bookId, { status: "onloan", dateBorrowed: today });
+
       // Reload books
       loadBooks();
-      
+
       showToastNotification(`Book request approved! ${book?.borrower || 'Borrower'} has been notified.`, "success");
+      // After approving, switch to 'Books I'm Lending' so admin sees on-loan books
+      setActiveTab('lending');
     } catch (error) {
       showToastNotification("An error occurred while approving the request", "error");
     } finally {
@@ -332,7 +342,7 @@ const handleDeleteBook = async () => {
         <div className="books-container">
           {/* Public Books section for users to request borrowing */}
           <div className="public-books-panel">
-            <h3 className="panel-title">Books</h3>
+                    <h3 className="panel-title">Available Books</h3>
             <table className="books-table public">
               <thead>
                 <tr>
@@ -345,25 +355,34 @@ const handleDeleteBook = async () => {
               <tbody>
                 {visiblePublicBooks.length > 0 ? (
                   visiblePublicBooks.map(book => (
-                    <tr key={`public-${book.id}`} className="book-row">
-                      <td>{book.title}</td>
+                    <tr key={`public-${book.id}`} className={`book-row ${book.status === 'pending' ? 'pending' : ''}`}>
+                      <td>
+                        {book.title}
+                        {book.status === 'pending' && (
+                          <span className="pending-badge">Pending</span>
+                        )}
+                      </td>
                       <td>{book.owner || '-'}</td>
                       <td>{book.dateAdded || '-'}</td>
                       <td className="actions-cell">
                           {book.owner && userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username) ? (
-                          // Owner controls: Edit / Delete
+                          // Owner controls: Delete only (Edit removed per admin preference)
                           <>
-                            <button className="action-btn edit-btn" onClick={() => openEditModal(book.id)}>Edit</button>
                             <button className="action-btn decline-btn" onClick={() => openDeleteConfirm(book.id)}>Delete</button>
                           </>
                         ) : (
-                          <button
-                            className="action-btn request-btn"
-                            onClick={() => handleRequest(book.id)}
-                            disabled={actionLoading.id === book.id}
-                          >
-                            {actionLoading.id === book.id && actionLoading.type === 'request' ? 'Requesting...' : 'Request'}
-                          </button>
+                          // If book is pending (someone already requested), show disabled indicator; otherwise allow Request
+                          book.status === 'pending' ? (
+                            <button className="action-btn" disabled>Pending</button>
+                          ) : (
+                            <button
+                              className="action-btn request-btn"
+                              onClick={() => handleRequest(book.id)}
+                              disabled={actionLoading.id === book.id}
+                            >
+                              {actionLoading.id === book.id && actionLoading.type === 'request' ? 'Sending request...' : 'Request to Borrow'}
+                            </button>
+                          )
                         )}
                       </td>
                     </tr>
@@ -380,19 +399,19 @@ const handleDeleteBook = async () => {
               className={`tab-btn ${activeTab === 'books' ? 'active' : ''}`}
               onClick={() => setActiveTab('books')}
             >
-              Books
+              Available
             </button>
             <button 
               className={`tab-btn ${activeTab === 'lending' ? 'active' : ''}`}
               onClick={() => setActiveTab('lending')}
             >
-              Books I'm Lending
+              My Lending
             </button>
             <button 
               className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
               onClick={() => setActiveTab('requests')}
             >
-              Incoming Requests
+              Requests
             </button>
           </div>
           
@@ -414,8 +433,7 @@ const handleDeleteBook = async () => {
                     {...book} 
                       onApprove={book.status === 'pending' ? handleApprove : null}
                       onDecline={book.status === 'pending' ? handleDecline : () => openDeleteConfirm(book.id)}
-                    onEdit={userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username) ? openEditModal : null}
-                    onDelete={userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username) ? () => openDeleteConfirm(book.id) : null}
+                      onDelete={userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username) ? () => openDeleteConfirm(book.id) : null}
                     isProcessing={actionLoading.id === book.id}
                     processingType={actionLoading.type}
                   />
@@ -447,30 +465,30 @@ const handleDeleteBook = async () => {
       {/* Delete Confirmation Modal */}
       {bookToDelete && (
         <div className="modal-overlay" onClick={closeDeleteConfirm}>
-          <div className="modal-content confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Delete Book</h2>
-              <button className="close-modal-btn" onClick={closeDeleteConfirm}>×</button>
-            </div>
-            <p>
-              Are you sure you want to delete <strong>{bookToDelete.title}</strong>? This action cannot be undone.
-            </p>
-            <div className="modal-actions">
-              <button type="button" className="cancel-btn" onClick={closeDeleteConfirm} disabled={deleteLoading}>
-                Cancel
-              </button>
-              <button type="button" className="submit-btn danger-btn" onClick={handleDeleteBook} disabled={deleteLoading}>
-                {deleteLoading ? (
-                  <>
-                    <span className="spinner" /> Deleting...
-                  </>
-                ) : (
-                  "Delete Book"
-                )}
-              </button>
+            <div className="modal-content confirm-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Remove Book</h2>
+                <button className="close-modal-btn" onClick={closeDeleteConfirm}>×</button>
+              </div>
+              <p>
+                Are you sure you want to remove <strong>{bookToDelete.title}</strong> from the library? This action cannot be undone.
+              </p>
+              <div className="modal-actions">
+                <button type="button" className="cancel-btn" onClick={closeDeleteConfirm} disabled={deleteLoading}>
+                  Cancel
+                </button>
+                <button type="button" className="submit-btn danger-btn" onClick={handleDeleteBook} disabled={deleteLoading}>
+                  {deleteLoading ? (
+                    <>
+                      <span className="spinner" /> Removing...
+                    </>
+                  ) : (
+                    "Remove Book"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
       )}
 
       {/* Edit Book Modal (Admin) */}
@@ -478,7 +496,7 @@ const handleDeleteBook = async () => {
         <div className="modal-overlay" onClick={closeEditModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Edit Book</h2>
+              <h2>Edit Book Details</h2>
               <button className="close-modal-btn" onClick={closeEditModal}>×</button>
             </div>
             <form onSubmit={handleSaveEdit}>
@@ -528,10 +546,10 @@ const handleDeleteBook = async () => {
                   {isEditing ? (
                     <>
                       <span className="spinner"></span>
-                      Saving...
+                      Saving
                     </>
                   ) : (
-                    "Save Changes"
+                    "Save"
                   )}
                 </button>
               </div>

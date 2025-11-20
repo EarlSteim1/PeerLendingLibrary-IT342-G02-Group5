@@ -88,12 +88,31 @@
     gap: 8px;
 }
 
+.action-btn {
+    padding: 8px 14px;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-left: 10px;
+    width: auto;
+    transition: all 0.15s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 6px;
+    color: #fff;
+    border: none;
+}
+
 .approve-btn {
-    background-color: var(--primary-green);
+    background-color: #2e8b57; /* professional green */
 }
 
 .decline-btn {
-    background-color: #e74c3c; /* Red for decline */
+    background-color: #d9534f; /* professional red */
+}
+
+.request-btn {
+    background-color: #007bff; /* primary blue */
 }
 
 .action-btn:disabled {
@@ -173,4 +192,21 @@
     top: 0;
     background: #fff;
     z-index: 2;
+}
+
+/* Highlight pending rows for easy admin visibility */
+.book-row.pending td {
+    background-color: #fff8ef; /* very light orange */
+}
+
+.pending-badge {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 3px 8px;
+    font-size: 0.75em;
+    font-weight: 700;
+    color: #b35400;
+    background: #fff2e6;
+    border-radius: 12px;
+    vertical-align: middle;
 }

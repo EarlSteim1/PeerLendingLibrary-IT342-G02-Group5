@@ -105,6 +105,7 @@ export const StorageService = {
       email: user.email,
       password: user.password, // NOTE: plaintext for demo only
       fullName: user.fullName,
+      role: user.role || 'user',
       profile: user.profile || {},
     };
     users.push(newUser);
