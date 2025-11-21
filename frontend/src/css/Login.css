@@ -1,242 +1,225 @@
-/* This file styles the Login and Register pages. */
-@import url('./global.css');
-
-/* --- Custom Variables for Color and Shadow (If not in global.css) --- */
-/* Assuming these are defined in global.css, but adding them here for clarity if they weren't: */
-/*
-:root {
-    --primary-green: #2ecc71; 
-    --secondary-bg: #f7faff; 
-    --button-blue: #3498db;
-    --text-dark: #34495e;
-    --text-medium: #7f8c8d;
-    --border-color: #ecf0f1;
-    --border-radius-small: 6px;
-    --border-radius-large: 12px;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* Full screen wrapper */
+.centered-page-wrapper {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--auth-bg); /* dirty white background for auth pages */
+  box-sizing: border-box;
 }
-*/
 
-/* --- Login/Register Split-Screen Container --- */
+/* Container fills full width and height */
 .login-container {
   display: flex;
-  height: 90vh;
-  width: 90%; 
-  max-width: 1400px;
-  background-color: white;
-  /* Enhanced: Use a cleaner border-radius and shadow */
-  border-radius: var(--border-radius-large); 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  max-width: none;
 }
 
-/* LEFT SIDE */
-.left {
+/* Left and Right panels split screen */
+.left, .right {
   flex: 1;
-  background-color: var(--secondary-bg);
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  padding: 50px;
+  padding: 20px;
   box-sizing: border-box;
-  position: relative;
-  /* Added subtle color transition */
-  transition: background-color 0.3s ease;
+}
+
+/* Ensure right panel uses auth background (dirty white) */
+.right {
+  background-color: var(--auth-bg);
+}
+
+.left {
+  background-color: #f7faff;
+}
+
+/* Full-height background images for left panels */
+.left.login-left {
+  background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1400&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffffff;
+}
+
+.left.register-left {
+  background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1400&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffffff;
+}
+
+/* Hide inline small illustration when using background cover */
+.left .illustration {
+  display: none;
 }
 
 .logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  position: absolute; 
-  top: 40px;
-  left: 50px;
+  margin-bottom: 30px;
 }
 
 .logo img {
-  width: 40px;
-  height: 40px;
-  /* Added a primary color border/ring */
-  border: 2px solid var(--primary-green);
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
 }
 
-.logo h1 {
-  font-size: 26px;
-  color: var(--text-dark);
-  font-weight: 700; /* Made logo text bolder */
+.left h1 {
+  font-weight: 700;
+  font-size: 28px;
   margin: 0;
 }
 
-.left .illustration {
-  width: 90%;
-  max-width: 550px;
-  /* Added a smooth transition for any future animations */
-  transition: transform 0.5s ease;
+.left img.illustration {
+  max-width: 90%;
+  height: auto;
+  margin-bottom: 20px;
 }
 
 .left h3 {
-  color: var(--text-medium);
   font-weight: 500;
-  margin-top: 30px;
-  font-size: 1.2em; /* Slightly larger heading */
+  color: #555;
+  font-size: 18px;
+  margin-top: 0;
 }
 
-/* RIGHT SIDE (Form) */
-.right {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 80px;
-}
-
+/* Form box */
 .form-box {
   width: 100%;
-  max-width: 400px;
-  /* Added a subtle internal shadow/glow for the form container */
-  /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); */
-  padding: 20px 0;
+  max-width: 420px; /* centered, not wide */
+  margin: 0 auto; /* ensure centering */
+  box-sizing: border-box;
 }
 
 .form-box h2 {
-    font-size: 2em;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 30px;
+  margin-bottom: 1.5rem;
 }
 
-/* --- Input Field Styling --- */
-.input-group {
-    position: relative;
-    margin-bottom: 20px; /* Slightly reduced margin */
+/* Center form titles across auth pages */
+.form-box h2,
+.form-box h2 { /* explicit selector for consistency */
+  text-align: center;
 }
 
+/* Fixed small book icon at top-left for branding on auth pages */
+.app-top-left-icon {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 11000;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.97);
+  padding: 6px 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-top-left-icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.app-brand-text {
+  margin-left: 8px;
+  color: #000; /* visible black text per request */
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.6px;
+}
+
+/* Inputs full width */
 .input-group input {
-    width: 100%;
-    /* Keep padding as defined, assuming the emoji removal changes were reverted */
-    padding: 14px 15px 14px 45px; 
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-small);
-    font-size: 16px; /* Slightly adjusted font size */
-    box-sizing: border-box;
-    transition: border-color 0.3s, box-shadow 0.3s; /* Added box-shadow transition */
-}
-
-.input-group .input-icon {
-    position: absolute;
-    top: 50%;
-    left: 15px;
-    transform: translateY(-50%);
-    color: var(--text-medium);
-    font-size: 18px;
-    /* Added focus style for icons */
-    transition: color 0.3s;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 16px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease;
 }
 
 .input-group input:focus {
-    border-color: var(--button-blue);
-    outline: none;
-    /* Enhanced: Add a subtle glow/shadow on focus */
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); 
+  border-color: #007bff;
 }
 
-/* Optional: Make the icon turn the primary color on input focus */
-.input-group input:focus + .input-icon {
-    color: var(--button-blue);
+/* Icons inside inputs */
+.input-icon {
+  position: absolute;
+  margin-left: 10px;
+  pointer-events: none;
+  user-select: none;
+  font-size: 18px;
+  color: #888;
 }
 
-/* --- Remember Me and Button --- */
+/* Remember me styling */
 .remember {
-    display: flex;
-    align-items: center;
-    margin-bottom: 25px; /* Adjusted margin */
-    font-size: 15px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.remember label {
-    color: var(--text-medium);
-    transition: color 0.3s;
-}
-
-.remember:hover label {
-    color: var(--text-dark);
-}
-
-button {
-  background-color: var(--button-blue);
-  color: white;
-  padding: 14px;
-  border: none;
-  border-radius: var(--border-radius-small);
-  cursor: pointer;
-  font-weight: 600;
-  width: 100%;
-  /* Enhanced: Added box shadow to button */
-  box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3); 
-  transition: background-color 0.3s, box-shadow 0.3s, transform 0.1s;
-}
-
-button:hover {
-  background-color: #0056b3;
-  /* Enhanced: Slightly stronger shadow and scale for feedback */
-  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
-  transform: translateY(-1px);
-}
-
-/* Google Button Specific Styling (Assuming from previous steps) */
+/* Buttons full width */
+button[type="submit"],
 .google-login-btn {
-    background-color: white;
-    color: var(--text-dark);
-    border: 1px solid #ccc; /* Slightly darker border for contrast */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  border-radius: 6px;
 }
 
-.google-login-btn:hover {
-    background-color: #f0f0f0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+/* Google button specifics */
+.google-login-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Link Text */
-.link-text a {
-    color: var(--primary-green);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.2s;
+.google-icon {
+  display: inline-block;
 }
 
-.link-text a:hover {
-    color: #27ae60;
-    text-decoration: underline;
+/* Link text */
+.link-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
 }
 
-/* Error Styling */
-.input-error {
-    border-color: #e74c3c !important;
-    box-shadow: 0 0 5px rgba(231, 76, 60, 0.3) !important;
+/* Demo credentials card (visible on auth pages) */
+.demo-credentials {
+  background: transparent; /* no white box */
+  color: #333;
+  padding: 0;
+  box-shadow: none;
+  font-size: 13px; /* small */
+  line-height: 1.2;
+  margin-top: 12px;
+  text-align: center;
 }
-
-.error-message {
-    display: block;
-    color: #e74c3c;
-    font-size: 0.85em;
-    margin-top: 5px;
-    font-weight: 500;
+.demo-credentials .cred-row {
+  display: block;
+  margin: 3px 0;
 }
-
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
+.demo-credentials code {
+  background: transparent;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #111;
 }
-
-button:disabled:hover {
-    background-color: var(--button-blue);
-    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
-    transform: none;
-}
-
-/* --- Responsive Layout (Unchanged) --- */
-/* ... (Existing responsive styles remain the same) ... */

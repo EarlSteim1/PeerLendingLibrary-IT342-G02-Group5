@@ -35,38 +35,32 @@ function Login() {
 
     setLoading(true);
 
-    // ⚡️ SIMULATION: Replace this block with your actual API call
     try {
-        // Simulating network delay for backend processing
         await new Promise(resolve => setTimeout(resolve, 1500)); 
 
-            // Validate user against stored users
-            const user = StorageService.getUserByCredential(username.trim());
-            if (!user) {
-              showToastNotification('Account not found. Please register first.', 'error');
-              setLoading(false);
-              return;
-            }
+        const user = StorageService.getUserByCredential(username.trim());
+        if (!user) {
+          showToastNotification('Account not found. Please register first.', 'error');
+          setLoading(false);
+          return;
+        }
 
-            const valid = StorageService.validateUserPassword(username.trim(), password);
-            if (!valid) {
-              showToastNotification('Invalid credentials. Please check your username/email and password.', 'error');
-              setLoading(false);
-              return;
-            }
+        const valid = StorageService.validateUserPassword(username.trim(), password);
+        if (!valid) {
+          showToastNotification('Invalid credentials. Please check your username/email and password.', 'error');
+          setLoading(false);
+          return;
+        }
 
-            // Successful login: set session and profile from stored user
-            StorageService.setUserSession(user.username);
-            StorageService.saveUserProfile(user.profile || { fullName: user.fullName, email: user.email });
+        StorageService.setUserSession(user.username);
+        StorageService.saveUserProfile(user.profile || { fullName: user.fullName, email: user.email });
 
-            showToastNotification('Login successful! Welcome back.', 'success');
-            // Redirect to the dashboard
-            setTimeout(() => {
-              navigate('/dashboard');
-            }, 800);
+        showToastNotification('Login successful! Welcome back.', 'success');
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 800);
 
     } catch (error) {
-        // Handle network errors or unexpected issues
         console.error("Login Error:", error);
         showToastNotification("An error occurred during login. Please try again.", "error");
     } finally {
@@ -79,127 +73,224 @@ function Login() {
   };
 
   return (
-    <div className="centered-page-wrapper">
-      {/* Toast Notification */}
-      <Toast 
-        message={toastMessage} 
-        type={toastType} 
-        show={showToast} 
-        onClose={() => setShowToast(false)} 
-      />
+    <div
+      className="login-container"
+      style={{
+        display: "flex",
+        height: "100vh",
+        width: "100vw",
+        margin: 0,
+        padding: 0,
+        overflow: "hidden",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
+    >
+      {/* Top-left book icon + brand text */}
+         <div className="app-top-left-icon" aria-hidden="true">
+        <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book icon" />
+        <span className="app-brand-text">PEER READS</span>
+      </div>
       
-        <div className="login-container">
-          
-          {/* LEFT SIDE: Login Illustration */}
-          <div className="left">
-            <div className="logo">
-              <img src="https://cdn-icons-png.flaticon.com/512/3004/3004613.png" alt="Peer Reads Logo"/>
-              <h1>Peer Reads</h1>
+      {/* LEFT SIDE */}
+      <div
+        className="left login-left"
+        style={{
+          flex: 1,
+          height: "100%",
+          backgroundColor: "#f7faff",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "40px",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          className="logo"
+          style={{ marginBottom: "30px", textAlign: "center", color: "#2ecc71" }}
+        >
+          <h1 style={{ margin: 0 }}></h1>
+        </div>
+        <h3 style={{ color: "#555", textAlign: "center" }}>
+   
+        </h3>
+      </div>
+
+      {/* RIGHT SIDE */}
+      <div
+        className="right"
+        style={{
+          flex: 1,
+          height: "100%",
+          overflowY: "auto",
+          padding: "60px 80px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <div className="form-box" style={{ width: "100%", margin: "0 auto" }}>
+          <h2 style={{ marginBottom: "30px", textAlign: "center" }}>Welcome Back</h2>
+
+          <form onSubmit={handleStandardSubmit} id="login-form">
+            <div className="input-group" style={{ marginBottom: "20px", position: "relative" }}>
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  padding: "12px 40px 12px 14px",
+                  fontSize: "16px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                }}
+              />
+              <span
+                className="input-icon"
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontSize: "18px",
+                  color: "#888",
+                  userSelect: "none",
+                }}
+              >
+                
+              </span>
             </div>
-            <img src="https://via.placeholder.com/400x250/f7faff?text=Reading+Community+Illustration" alt="Reading illustration" className="illustration"/>
-            <h3>Share stories, build community</h3>
+
+            <div className="input-group" style={{ marginBottom: "20px", position: "relative" }}>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  padding: "12px 40px 12px 14px",
+                  fontSize: "16px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                }}
+              />
+              <span
+                className="input-icon"
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontSize: "18px",
+                  color: "#888",
+                  userSelect: "none",
+                }}
+              >
+                
+              </span>
+            </div>
+
+            <div className="remember" style={{ marginBottom: "25px" }}>
+              <input
+                type="checkbox"
+                id="remember"
+                disabled={loading}
+                style={{ marginRight: "8px" }}
+              />
+              <label htmlFor="remember" style={{ userSelect: "none" }}>
+                Remember me
+              </label>
+            </div>
+          </form>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "15px",
+              marginBottom: "20px",
+            }}
+          >
+            <button
+              type="submit"
+              form="login-form"
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: "12px 14px",
+                fontSize: "16px",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1,
+                borderRadius: "6px",
+                border: "none",
+                backgroundColor: "#007bff",
+                color: "white",
+                fontWeight: "600",
+                transition: "background-color 0.3s ease",
+              }}
+              onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = "#007bff")}
+              onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = "#007bff")}
+            >
+              {loading ? "Logging In..." : "Log In"}
+            </button>
+
+            <button
+              type="button"
+              className="google-login-btn"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: "12px 14px",
+                fontSize: "16px",
+                background: "white",
+                color: "var(--text-dark, #333)",
+                border: "1px solid #ccc",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1,
+                borderRadius: "6px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                fontWeight: "600",
+              }}
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                alt="Google logo"
+                style={{ width: "18px", height: "18px" }}
+              />
+              Google
+            </button>
           </div>
 
-          {/* RIGHT SIDE: Login Form */}
-          <div className="right">
-            <div className="form-box">
-              <h2>Welcome Back</h2>
-              
-              {/* --- Standard Login Form Inputs --- */}
-              <form onSubmit={handleStandardSubmit} id="login-form">
-                
-                {/* 1. Username Input Group */}
-                <div className="input-group">
-                    <input 
-                        type="text" 
-                        placeholder="Username" 
-                        value={username} 
-                        onChange={(e) => setUsername(e.target.value)} 
-                        required 
-                        disabled={loading}
-                    />
-                    <span className="input-icon">👤</span> 
-                </div>
+          <p className="link-text" style={{ textAlign: "center", marginBottom: "25px" }}>
+            Don’t have an account? <Link to="/register">Register</Link>
+          </p>
 
-                {/* 2. Password Input Group */}
-                <div className="input-group">
-                    <input 
-                        type="password" 
-                        placeholder="Password" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        required 
-                        disabled={loading}
-                    />
-                    <span className="input-icon">🔒</span> 
-                </div>
-
-                <div className="remember">
-                  <input type="checkbox" id="remember" disabled={loading} />
-                  <label htmlFor="remember">Remember me</label>
-                </div>
-              </form>
-              
-              {/* --- Button Container with Inline Flexbox Styles for Alignment --- */}
-              <div 
-                  style={{
-                      display: 'flex', 
-                      gap: '15px', 
-                      marginTop: '-20px', 
-                      marginBottom: '30px'
-                  }}
-              >
-                  {/* Standard Log In Button */}
-                  <button 
-                      type="submit" 
-                      form="login-form" 
-                      disabled={loading}
-                      style={{ 
-                          flex: 1, 
-                          padding: '10px 14px', 
-                          fontSize: '15px',
-                          width: 'auto',
-                          cursor: loading ? 'not-allowed' : 'pointer',
-                          opacity: loading ? 0.7 : 1,
-                      }} 
-                  >
-                      {loading ? 'Logging In...' : 'Log In'}
-                  </button>
-
-                  {/* Google Login Button */}
-                  <button 
-                      type="button" 
-                      className="google-login-btn" 
-                      onClick={handleGoogleLogin}
-                      disabled={loading}
-                      style={{ 
-                          flex: 1, 
-                          padding: '10px 14px', 
-                          fontSize: '15px', 
-                          background: 'white',
-                          color: 'var(--text-dark)',
-                          border: '1px solid var(--border-color)',
-                          width: 'auto',
-                          cursor: loading ? 'not-allowed' : 'pointer',
-                          opacity: loading ? 0.7 : 1,
-                      }}
-                  >
-                      <img 
-                          src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" 
-                          alt="Google logo" 
-                          className="google-icon"
-                          style={{width: '18px', height: '18px', marginRight: '8px'}} 
-                      />
-                      Google
-                  </button>
-              </div>
-
-              <p className="link-text" style={{textAlign: 'center'}}>
-                Don’t have an account? <Link to="/register">Register</Link>
-              </p>
-            </div>
+          <div className="demo-credentials" aria-hidden>
+            <strong>Demo Credentials</strong>
+            <div className="cred-row"><span>Admin</span><code>admin@gmail.com</code><span>•</span><code>admin123</code></div>
+            <div className="cred-row"><span>User</span><code>user@gmail.com</code><span>•</span><code>user123</code></div>
           </div>
         </div>
+      </div>
+
+      {/* Toast Notification */}
+      <Toast  
+        message={toastMessage}
+        type={toastType}
+        show={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </div>
   );
 }

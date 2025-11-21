@@ -1,3 +1,4 @@
+// ...existing code...
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -12,7 +13,7 @@ function Register() {
     confirmEmail: "",
     password: "",
     confirmPassword: "",
-    role: 'user',
+    // ...existing code...
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -91,11 +92,11 @@ function Register() {
         email: formData.email.trim(),
         password: formData.password,
         fullName: formData.name.trim(),
-        role: formData.role || 'user',
+        role: 'user', // default role (removed role selection)
         profile: {
           fullName: formData.name.trim(),
           email: formData.email.trim(),
-          role: formData.role || 'user',
+          role: 'user',
           location: "Philippines",
           bio: "Welcome to Peer Reads!",
           joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
@@ -127,6 +128,9 @@ function Register() {
     }
   };
 
+  // spacing for each input group
+  const inputGroupStyle = { marginBottom: "12px" };
+
   return (
     <div className="centered-page-wrapper">
       {/* Toast Notification */}
@@ -136,20 +140,24 @@ function Register() {
         show={showToast} 
         onClose={() => setShowToast(false)} 
       />
+      {/* Top-left book icon for branding */}
+       <div className="app-top-left-icon" aria-hidden="true">
+        <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book icon" />
+        <span className="app-brand-text">PEER READS</span>
+      </div>
       
         <div className="login-container">
           {/* LEFT SIDE: Register Illustration */}
-          <div className="left">
+          <div className="left register-left">
             <img
               src="https://via.placeholder.com/400x250/f7faff?text=Community+Illustration"
               alt="Community illustration"
               className="illustration"
               style={{marginBottom: '50px'}} 
             />
-            <h3>Share stories, build community</h3>
+            
             <div className="logo" style={{position: 'relative', top: 'auto', left: 'auto', marginTop: '20px'}}>
-              <img src="https://cdn-icons-png.flaticon.com/512/3004/3004613.png" alt="Peer Reads Logo"/>
-              <h1>Peer Reads</h1>
+              <h1></h1>
             </div>
           </div>
           
@@ -160,7 +168,7 @@ function Register() {
               <form onSubmit={handleSubmit}>
                 
                 {/* Full Name */}
-                <div className="input-group">
+                <div className="input-group" style={inputGroupStyle}>
                     <input 
                       name="name" 
                       type="text" 
@@ -172,21 +180,11 @@ function Register() {
                     />
                     {errors.name && <span className="error-message">{errors.name}</span>}
                 </div>
-                {/* Role selection */}
-                <div className="input-group" style={{marginTop: '6px'}}>
-                  <label style={{fontSize: '13px', color: 'var(--text-medium)', marginBottom: '6px'}}>Register as</label>
-                  <div style={{display: 'flex', gap: '12px'}}>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
-                      <input type="radio" name="role" value="user" checked={formData.role === 'user'} onChange={handleChange} disabled={loading} /> User
-                    </label>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
-                      <input type="radio" name="role" value="admin" checked={formData.role === 'admin'} onChange={handleChange} disabled={loading} /> Admin
-                    </label>
-                  </div>
-                </div>
-                
+
+                {/* Removed role selection - sign up defaults to 'user' */}
+
                 {/* Email */}
-                <div className="input-group">
+                <div className="input-group" style={inputGroupStyle}>
                     <input 
                       name="email" 
                       type="email" 
@@ -200,7 +198,7 @@ function Register() {
                 </div>
                 
                 {/* Confirm Email */}
-                <div className="input-group">
+                <div className="input-group" style={inputGroupStyle}>
                     <input 
                       name="confirmEmail" 
                       type="email" 
@@ -214,7 +212,7 @@ function Register() {
                 </div>
                 
                 {/* Password */}
-                <div className="input-group">
+                <div className="input-group" style={inputGroupStyle}>
                     <input 
                       name="password" 
                       type="password" 
@@ -228,7 +226,7 @@ function Register() {
                 </div>
 
                 {/* Confirm Password */}
-                <div className="input-group">
+                <div className="input-group" style={inputGroupStyle}>
                     <input 
                       name="confirmPassword" 
                       type="password" 
@@ -243,14 +241,28 @@ function Register() {
                 
                 <button 
                   type="submit" 
-                  style={{marginTop: '0'}}
+                  className="login-button" 
                   disabled={loading}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    backgroundColor: "#007bff",
+                    color: "#ffffff",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    marginTop: "8px",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    display: "block",
+                  }}
                 >
                   {loading ? 'Signing Up...' : 'Sign Up'}
                 </button>
-                <p className="link-text" style={{textAlign: 'center', fontSize: '12px'}}>
+                <p className="link-text" style={{textAlign: 'center', fontSize: '15px'}}>
                   Already have a account? <Link to="/">Log In</Link>
                 </p>
+             
               </form>
             </div>
           </div>

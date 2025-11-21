@@ -65,11 +65,37 @@ function Dashboard() {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Navigate to My Books and show Books tab with the search query
+      // default behaviour for other search usages: navigate to MyBooks
       navigate('/mybooks', { state: { tab: 'books', query: searchQuery.trim() } });
     } else {
       showToastNotification("Please enter a search term", "error");
     }
+  };
+
+  // Top-dashboard search: filter local books and show floating results
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleTopSearch = (e) => {
+    e.preventDefault();
+    const q = (searchQuery || '').trim().toLowerCase();
+    if (!q) {
+      showToastNotification("Please enter a search term", "error");
+      return;
+    }
+    // filter by title, author, isbn
+    const results = (books || []).filter(b => {
+      return (b.title || '').toLowerCase().includes(q)
+        || (b.author || '').toLowerCase().includes(q)
+        || (b.isbn || '').toLowerCase().includes(q);
+    });
+    setSearchResults(results);
+    setSearchActive(true);
+  };
+
+  const closeSearchResults = () => {
+    setSearchActive(false);
+    setSearchResults([]);
   };
 
   const clearSearch = () => {
@@ -151,14 +177,15 @@ function Dashboard() {
       <nav className="navbar">
         {/* LEFT SIDE: Logo */}
         <div className="logo-nav">
-          <img src="https://cdn-icons-png.flaticon.com/512/3004/3004613.png" alt="Logo"/>
+          <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book logo"/>
           <h1>Peer Reads</h1>
         </div>
+        {/* navbar search removed to keep a single compact dashboard search */}
         
         {/* RIGHT SIDE: Navigation Links and Log Out Button */}
         <div className="nav-links">
-          <Link to="/dashboard" className="active-link">Dashboard</Link>
-          <Link to="/mybooks">My Books</Link>
+          <Link to="/dashboard" className="active-link">Books</Link>
+          <Link to="/mybooks">Peer Reads</Link>
           <Link to="/profile">Profile</Link>
           
           {/* Log Out button */}
@@ -173,77 +200,107 @@ function Dashboard() {
 
       {/* ... Main Dashboard Content ... */}
       <div className="dashboard-content">
-        <h2 className="welcome-header">
-          Hello, {userProfile?.fullName || "User"}! Welcome back.
-        </h2>
+        <div className="dashboard-grid">
+          <aside className="sidebar">
+            <div className="brand"></div>
+            <div className="nav-item active"></div>
+          </aside>
 
-        <div className="stats-grid">
-          {/* Card 1: Books Lent */}
-          <div className="stat-card lent-card">
-            <h3>Books Lent</h3>
-            <p className="stat-number">{statistics.booksLent}</p>
-            <span className="card-icon">🗂️</span>
-          </div>
+            <main className="main-panel">
+              <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+                <form className="top-search" onSubmit={handleTopSearch}>
+                  <input
+                    type="text"
+                    placeholder="Search books by title or author..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button type="submit">Search</button>
+                </form>
 
-          {/* Card 2: Books Borrowed */}
-          <div className="stat-card borrowed-card">
-            <h3>Books Borrowed</h3>
-            <p className="stat-number">{statistics.booksBorrowed}</p>
-            <span className="card-icon">📖</span>
-          </div>
-
-          {/* Card 3: Pending Requests */}
-          <div className="stat-card pending-card">
-            <h3>Pending Requests</h3>
-            <p className="stat-number">{statistics.pendingRequests}</p>
-            <span className="card-icon">🔔</span>
-          </div>
-        </div>
-        
-        <div className="bottom-section">
-          
-          {/* Left Column: Find Books */}
-          <div className="find-books-panel">
-            <h3>Find Books</h3>
-            <form className="search-group" onSubmit={handleSearch} aria-label="Search books">
-              <div className="search-box">
-                <span className="search-icon">🔍</span>
-                <input 
-                  type="text" 
-                  placeholder="Search books, authors or ISBN"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label="Search books"
-                />
-                {searchQuery && (
-                  <button type="button" className="clear-btn" onClick={clearSearch} aria-label="Clear search">✕</button>
+                {searchActive && (
+                  <div className="search-results" onMouseDown={(e) => e.preventDefault()}>
+                    {searchResults.length > 0 ? (
+                      searchResults.map((b) => (
+                        <div
+                          key={b.id}
+                          className="search-result-item"
+                          onClick={() => {
+                            setSearchActive(false);
+                            navigate('/mybooks', { state: { query: b.title } });
+                          }}
+                        >
+                          <div style={{ fontWeight: '600' }}>{b.title}</div>
+                          <div style={{ fontSize: '12px', color: '#666' }}>{b.author}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="search-result-item">No results</div>
+                    )}
+                  </div>
                 )}
               </div>
-              <button type="submit" className="search-submit">Search</button>
-            </form>
-          </div>
-          
 
-          {/* Right Column: Recent Activity & My Books */}
-          <div className="activity-panel">
-            
-            <div className="recent-activity-box">
-              <h3>Recent Activity</h3>
-              {statistics.pendingRequests > 0 ? (
-                <>
-                  <p>You have {statistics.pendingRequests} new request{statistics.pendingRequests > 1 ? 's' : ''}.</p>
-                  <p className="activity-detail">Check your incoming requests to approve or decline.</p>
-                </>
-              ) : (
-                <p>No recent activity.</p>
-              )}
-              {statistics.booksLent > 0 && (
-                <p className="activity-detail" style={{marginTop: '10px'}}>
-                  You have {statistics.booksLent} book{statistics.booksLent > 1 ? 's' : ''} currently on loan.
-                </p>
-              )}
+            {/* Stats cards moved to top */}
+            <div className="stats-grid">
+              {/* Card 1: Books Lent */}
+              <div className="stat-card lent-card">
+                <h3>Books Lent</h3>
+                <p className="stat-number">{statistics.booksLent}</p>
+                <span className="card-icon">🗂️</span>
+              </div>
+
+              {/* Card 2: Books Borrowed */}
+              <div className="stat-card borrowed-card">
+                <h3>Books Borrowed</h3>
+                <p className="stat-number">{statistics.booksBorrowed}</p>
+                <span className="card-icon">📖</span>
+              </div>
+
+              {/* Card 3: Pending Requests */}
+              <div className="stat-card pending-card">
+                <h3>Pending Requests</h3>
+                <p className="stat-number">{statistics.pendingRequests}</p>
+                <span className="card-icon">🔔</span>
+              </div>
             </div>
 
+            <h2 className="welcome-header">Hello, {userProfile?.fullName || "User"}! Welcome back.</h2>
+
+            {/* (Activity panels moved to right column) */}
+
+            <div className="popular-row">
+              {books.slice(0,3).map((b, i) => (
+                <div key={i} className="popular-card">
+                  <img src={`https://picsum.photos/seed/${b.id || i}/300/200`} alt="cover" />
+                  <div style={{fontWeight:600}}>{b.title || 'Sample Book'}</div>
+                  <div style={{fontSize:12, color:'#666'}}>{b.author || 'Unknown'}</div>
+                </div>
+              ))}
+              <div className="popular-card" style={{display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <div style={{fontSize:20,fontWeight:700,color:'#6b6bff'}}>+{Math.max(0, (books.length-3))}</div>
+              </div>
+            </div>
+
+            <div className="mybooks-panel">
+              <h3 style={{marginBottom:12}}>My Books</h3>
+              {books.slice(0,6).map(book => (
+                <div className="book-row" key={book.id} onClick={() => navigate('/mybooks')}>
+                  <div style={{display:'flex',alignItems:'center',gap:12}}>
+                    <img src={`https://picsum.photos/seed/${book.id}/64/64`} alt="thumb" style={{width:48,height:48,borderRadius:8}} />
+                    <div>
+                      <div style={{fontWeight:700}}>{book.title}</div>
+                      <div style={{fontSize:12,color:'#777'}}>{book.author || 'Unknown'}</div>
+                    </div>
+                  </div>
+                  <div style={{fontSize:12,color:'#999'}}>›</div>
+                </div>
+              ))}
+            </div>
+          </main>
+
+          <aside className="right-column">
+            {/* Your Books now on top */}
             <div className="my-books-box">
               <h3>Your Books</h3>
               {books.slice(0, 5).map(book => (
@@ -261,14 +318,39 @@ function Dashboard() {
                 </p>
               )}
               {userProfile?.role === 'admin' ? (
-                <button className="add-book-btn" onClick={openAddBookModal}>+ Add a New Book</button>
+                <button 
+                  className="add-book-btn bigger-add-btn"
+                  onClick={openAddBookModal}
+                >
+                  + Add a New Book
+                </button>
               ) : (
                 <p style={{color: 'var(--text-medium)', fontSize: '13px', marginTop: '12px'}}>
                   Only administrators can add new books. To borrow, use the <strong>Find Books</strong> panel.
                 </p>
               )}
             </div>
-          </div>
+
+            {/* Recent Activity below */}
+            <div className="activity-panel" style={{marginTop: '30px'}}>
+              <div className="recent-activity-box">
+                <h3>Recent Activity</h3>
+                {statistics.pendingRequests > 0 ? (
+                  <>
+                    <p>You have {statistics.pendingRequests} new request{statistics.pendingRequests > 1 ? 's' : ''}.</p>
+                    <p className="activity-detail">Check your incoming requests to approve or decline.</p>
+                  </>
+                ) : (
+                  <p>No recent activity.</p>
+                )}
+                {statistics.booksLent > 0 && (
+                  <p className="activity-detail" style={{marginTop: '10px'}}>
+                    You have {statistics.booksLent} book{statistics.booksLent > 1 ? 's' : ''} currently on loan.
+                  </p>
+                )}
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
 

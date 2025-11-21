@@ -188,13 +188,13 @@ function Profile() {
       
       {/* --- Top Navigation Bar --- */}
       <nav className="navbar">
-        <div className="logo-nav">
-            <img src="https://cdn-icons-png.flaticon.com/512/3004/3004613.png" alt="Logo"/>
-            <h1>Peer Reads</h1>
+         <div className="logo-nav">
+          <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book logo"/>
+          <h1>Peer Reads</h1>
         </div>
         <div className="nav-links">
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/mybooks">My Books</Link>
+          <Link to="/dashboard">Books</Link>
+          <Link to="/mybooks">Peer Reads</Link>
           <Link to="/profile" className="active-link">Profile</Link>
           <button className="logout-button nav-action-btn" onClick={handleLogout}>Log Out</button>
         </div>

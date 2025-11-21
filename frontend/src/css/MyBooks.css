@@ -1,212 +1,359 @@
-/* --- MyBooks Specific Styles (Based on image_f0058f.png) --- */
-
-.mybooks-content {
-    padding: 40px 50px;
-    flex-grow: 1;
-    background-color: var(--secondary-bg);
+/* Section container styles */
+.requests-section,
+.available-books-section,
+.lending-section {
+  margin-bottom: 40px;
+  background: #fff;
+  padding: 24px 28px;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
 
-.books-container {
-    background-color: #fff;
-    border-radius: var(--border-radius-large);
-    box-shadow: var(--shadow);
-    padding: 30px;
+.section-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #2c3e50;
+  border-bottom: 2px solid #2ecc71;
+  padding-bottom: 6px;
 }
 
-/* --- Tab Navigation Styling --- */
-.tabs-header {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
-    padding-bottom: 5px;
+/* Empty message styling */
+.empty-msg {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #777;
+  padding: 30px 0;
 }
 
-.tab-btn {
-    background: none;
-    border: none;
-    color: var(--text-medium);
-    font-size: 1em;
-    font-weight: 500;
-    padding: 10px 20px;
-    margin-right: 15px;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s ease-in-out;
-    width: auto; /* Override global button style */
-}
-
-.tab-btn:hover {
-    color: var(--text-dark);
-}
-
-.tab-btn.active {
-    color: var(--button-blue);
-    border-bottom: 3px solid var(--button-blue);
-    font-weight: 600;
-}
-
-/* --- Table Styling --- */
-.books-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.books-table th {
-    color: var(--text-medium);
-    font-weight: 500;
-    padding: 15px 10px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.books-table td {
-    padding: 15px 10px;
-    color: var(--text-dark);
-    font-size: 15px;
-    border-bottom: 1px solid #f7faff; /* Light separator */
-}
-
-.books-table tbody tr:hover {
-    background-color: var(--secondary-bg);
-}
-
-/* --- Action Buttons and Status Tags --- */
-.actions-cell {
-    text-align: right;
-    width: 25%;
-}
-
+/* Buttons */
 .action-btn {
-    padding: 8px 15px;
-    font-size: 0.9em;
-    font-weight: 500;
-    margin-left: 10px;
-    width: auto;
-    transition: opacity 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.action-btn {
-    padding: 8px 14px;
-    font-size: 0.9em;
-    font-weight: 600;
-    margin-left: 10px;
-    width: auto;
-    transition: all 0.15s ease-in-out;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 6px;
-    color: #fff;
-    border: none;
-}
-
-.approve-btn {
-    background-color: #2e8b57; /* professional green */
-}
-
-.decline-btn {
-    background-color: #d9534f; /* professional red */
-}
-
-.request-btn {
-    background-color: #007bff; /* primary blue */
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border: none;
+  transition: background-color 0.25s ease;
+  font-size: 0.9rem;
 }
 
 .action-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.button-spinner {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: buttonSpin 0.8s linear infinite;
+.action-btn.edit-btn {
+  background-color: #27ae60; /* nice green */
+  color: white;
 }
 
-@keyframes buttonSpin {
-    to {
-        transform: rotate(360deg);
-    }
+.action-btn.edit-btn:hover:not(:disabled) {
+  background-color: #219150;
 }
 
-/* Status Tag for borrowed books */
-.status-tag {
-    padding: 5px 10px;
-    border-radius: var(--border-radius-small);
-    font-size: 0.85em;
-    font-weight: 600;
-    text-transform: uppercase;
-    text-align: center;
-    color: white;
+.action-btn.decline-btn {
+  background-color: #e74c3c;
+  color: white;
+  margin-left: 8px;
 }
 
-.status-tag.onloan {
-    background-color: #3498db; /* Blue */
+.action-btn.decline-btn:hover:not(:disabled) {
+  background-color: #c0392b;
 }
 
-.status-tag.available {
-    background-color: var(--primary-green); /* Green */
+.action-btn.approve-btn {
+  background-color: #2ecc71;
+  color: white;
+  margin-right: 8px;
 }
 
-.status-tag.pending {
-    background-color: #ffb884; /* Orange */
+.action-btn.approve-btn:hover:not(:disabled) {
+  background-color: #27ae60;
 }
 
-/* Edit/Delete Modal Styling */
+.action-btn.request-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.action-btn.request-btn:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+/* Tabs header adjustment */
+.tabs-header {
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+}
+
+.tab-btn {
+  padding: 10px 22px;
+  border: 1.5px solid #2ecc71;
+  background: white;
+  border-radius: 30px;
+  color: #2ecc71;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+  background-color: #2ecc71;
+  color: white;
+}
+
+/* Table row pending badge */
+.pending-badge {
+  background-color: #e67e22;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Box shadow for the book tables for subtle depth */
+.books-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fdfdfd;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Table header style */
+.books-table thead tr {
+  background-color: #2ecc71;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Table cells */
+.books-table th,
+.books-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e1e1e1;
+  text-align: left;
+}
+
+/* Highlight pending rows */
+.book-row.pending {
+  background-color: #fff7e6;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 480px;
+  width: 90%;
+  padding: 20px 28px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.close-modal-btn {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  font-weight: 700;
+}
+
+.modal-form-group {
+  margin-bottom: 16px;
+}
+
+.modal-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.modal-form-group input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  background-color: #aaa;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background-color: #888;
+}
+
+.submit-btn {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #27ae60;
+}
+
 .danger-btn {
-    background-color: #e74c3c;
+  background-color: #e74c3c;
 }
 
 .danger-btn:hover:not(:disabled) {
-    background-color: #c0392b;
+  background-color: #c0392b;
 }
 
-.confirm-modal p {
-    color: var(--text-medium);
-    margin: 10px 0 0 0;
+.spinner,
+.button-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
 }
 
-/* Make public books panel scrollable when many items exist */
-.public-books-panel {
-    margin-bottom: 20px;
-    max-height: 360px; /* adjust as needed */
-    overflow: auto;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+    
+.book-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* a bit tighter gap */
 }
 
-/* Make tab panel scrollable so large lists don't expand the page too much */
-.tab-panel {
-    max-height: 420px;
-    overflow: auto;
+.book-cover {
+  width: 35px;    /* smaller width */
+  height: 50px;   /* smaller height */
+  object-fit: cover;
+  border-radius: 3px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
-/* Keep table headers visible while scrolling */
-.books-table thead th {
-    position: sticky;
-    top: 0;
-    background: #fff;
-    z-index: 2;
+.modal {
+  background: white;
+  border-radius: 8px;
+  width: 360px;
+  max-width: 90%;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  animation: modalFadeIn 0.3s ease forwards;
 }
 
-/* Highlight pending rows for easy admin visibility */
-.book-row.pending td {
-    background-color: #fff8ef; /* very light orange */
+.modal-header, .modal-footer {
+  padding: 12px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.pending-badge {
-    display: inline-block;
-    margin-left: 10px;
-    padding: 3px 8px;
-    font-size: 0.75em;
-    font-weight: 700;
-    color: #b35400;
-    background: #fff2e6;
-    border-radius: 12px;
-    vertical-align: middle;
+.modal-header {
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-danger:disabled {
+  background-color: #c0392b;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #bdc3c7;
+  color: #2c3e50;
+}
+
+.btn-secondary:hover {
+  background-color: #95a5a6;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+@keyframes modalFadeIn {
+  from {opacity: 0; transform: translateY(-10px);}
+  to {opacity: 1; transform: translateY(0);}
 }

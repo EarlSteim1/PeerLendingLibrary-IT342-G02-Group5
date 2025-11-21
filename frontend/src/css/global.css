@@ -3,6 +3,7 @@
   --primary-green: #2ecc71; /* Logo/Text accent */
   --button-blue: #007bff; /* Primary button accent */
   --secondary-bg: #f7faff; /* Light background for left pane and body */
+  --auth-bg: #f6f5ef; /* dirty white for auth pages */
   --text-dark: #333;
   --text-medium: #555;
   --border-color: #ddd;
@@ -18,9 +19,8 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Shared Titles */
@@ -35,13 +35,13 @@ h2 {
 /* --- Card Container for Dashboard/Profile --- */
 .card-container {
   width: 100%;
-  max-width: 550px;
+  max-width: 1200px; /* widened to support full-screen layouts */
   padding: 50px;
   background-color: #fff;
   border-radius: var(--border-radius-large);
   box-shadow: var(--shadow);
   text-align: center;
-  margin: 20px auto; 
+  margin: 20px auto;
 }
 
 /* --- Secondary/Link Text --- */

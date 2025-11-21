@@ -3,10 +3,25 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Toast from "../components/Toast";
 import StorageService from "../utils/storage";
 import "../css/global.css";
-import "../css/Dashboard.css"; // Includes Navbar styles
+import "../css/Dashboard.css"; 
 import "../css/MyBooks.css";
 
-// ... BookItem component (unchanged) ...
+const randomBookCovers = [
+  "https://covers.openlibrary.org/b/id/10523342-L.jpg",
+  "https://covers.openlibrary.org/b/id/8231856-L.jpg",
+  "https://covers.openlibrary.org/b/id/11153220-L.jpg",
+  "https://covers.openlibrary.org/b/id/8231992-L.jpg",
+  "https://covers.openlibrary.org/b/id/10456458-L.jpg",
+  "https://covers.openlibrary.org/b/id/10523148-L.jpg",
+  "https://covers.openlibrary.org/b/id/11153248-L.jpg",
+  "https://covers.openlibrary.org/b/id/10050483-L.jpg",
+];
+
+const getRandomCover = () => {
+  const idx = Math.floor(Math.random() * randomBookCovers.length);
+  return randomBookCovers[idx];
+};
+
 const BookItem = ({
   id,
   title,
@@ -14,20 +29,35 @@ const BookItem = ({
   dateRequested,
   dateAdded,
   status,
+  owner,
+  image,
   onApprove,
   onDecline,
   onEdit,
   isProcessing,
-  processingType
+  processingType,
+  declineLabel = "Delete"
 }) => (
   <tr className={`book-row ${status === 'pending' ? 'pending' : ''}`}>
-    <td>
+    <td style={{ display: "flex", alignItems: "center" }}>
+      <img
+        src={image || "https://via.placeholder.com/50x70?text=No+Cover"}
+        alt={title}
+        style={{
+          width: 50,
+          height: 70,
+          objectFit: "cover",
+          marginRight: 10,
+          borderRadius: 4,
+          flexShrink: 0,
+        }}
+      />
       {title}
       {status === 'pending' && (
         <span className="pending-badge">Pending</span>
       )}
     </td>
-    <td>{borrower || '-'}</td>
+    <td>{borrower || owner || '-'}</td>
     <td>{dateRequested || dateAdded || '-'}</td>
     <td className="actions-cell">
       {status === 'pending' && onApprove && onDecline ? (
@@ -52,15 +82,14 @@ const BookItem = ({
           >
             {isProcessing && processingType === 'decline' ? (
               <>
-                <span className="button-spinner" /> Deleting...
+                <span className="button-spinner" /> {declineLabel}ing...
               </>
             ) : (
-              'Delete'
+              declineLabel
             )}
           </button>
         </>
       ) : (
-        // If owner controls are provided, show Edit/Delete buttons, otherwise show status tag
         (onEdit || onDecline) ? (
           <>
             {onEdit && <button className="action-btn edit-btn" onClick={() => onEdit(id)}>Edit</button>}
@@ -75,7 +104,6 @@ const BookItem = ({
     </td>
   </tr>
 );
-
 
 function MyBooks() {
   const [activeTab, setActiveTab] = useState("books");
@@ -92,91 +120,106 @@ function MyBooks() {
   const [bookToDelete, setBookToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editBookData, setEditBookData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
   useEffect(() => {
-    // Check if user is logged in
     if (!StorageService.isLoggedIn()) {
       navigate("/");
       return;
     }
-
-    // Load books
     loadBooks();
 
-    // Load profile
     const profile = StorageService.getUserProfile();
     if (profile) setUserProfile(profile);
 
-    // If navigation passed a tab preference (e.g., after adding a book), set active tab
     if (location?.state && location.state.tab) {
       setActiveTab(location.state.tab);
     }
-    // Read search query if provided by Dashboard search
     if (location?.state && location.state.query) {
       setPublicQuery(location.state.query);
     } else {
-      setPublicQuery('');
+      setPublicQuery("");
     }
   }, [navigate, location]);
 
   const loadBooks = () => {
-    const lending = StorageService.getLendingBooks();
-    const borrowing = StorageService.getBorrowingBooks();
+    const lending = (StorageService.getLendingBooks() || []).map(book => ({
+      ...book,
+      image: getRandomCover(),
+    }));
+
+    const borrowing = (StorageService.getBorrowingBooks() || []).map(book => ({
+      ...book,
+      image: getRandomCover(),
+    }));
+
     setLendingBooks(lending);
     setBorrowingBooks(borrowing);
   };
 
-  // Pending requests that are relevant to the current user (admin): only requests for books they own
-  const pendingRequests = lendingBooks.filter(book => book.status === 'pending' && (userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username)));
+  const isOwner = (bookOwner) => {
+    if (!userProfile || !bookOwner) return false;
+    const bookOwnerNorm = bookOwner.trim().toLowerCase();
+    const fullNameNorm = userProfile.fullName?.trim().toLowerCase() || "";
+    const usernameNorm = userProfile.username?.trim().toLowerCase() || "";
+    return bookOwnerNorm === fullNameNorm || bookOwnerNorm === usernameNorm;
+  };
 
-  // Books I'm Lending: show books owned by current user that are on loan or pending
-  // (include pending here so owners can approve requests directly from this tab)
-  const lendingDisplay = userProfile ? lendingBooks.filter(book => (book.owner === userProfile.fullName || book.owner === userProfile.username) && (book.status === 'onloan' || book.status === 'pending')) : [];
+  const isAdmin = userProfile?.role === "admin";
 
-  // Public Books list: all available books (users can request these)
-  // Include pending so public panel shows requested books with a badge (requester still visible)
-  const publicBooks = lendingBooks.filter(book => book.status === 'available' || book.status === 'pending');
-  const visiblePublicBooks = publicQuery && activeTab === 'books'
-    ? publicBooks.filter(book => {
-        const q = publicQuery.trim().toLowerCase();
-        return (book.title || '').toLowerCase().includes(q) || (book.author || '').toLowerCase().includes(q) || (book.isbn || '').toLowerCase().includes(q) || (book.owner || '').toLowerCase().includes(q);
-      })
-    : publicBooks;
+  const pendingRequests = lendingBooks.filter(
+    (book) => book.status === "pending" && (isAdmin || isOwner(book.owner))
+  );
+
+  const lendingDisplay = lendingBooks.filter(
+    (book) =>
+      (isAdmin || isOwner(book.owner)) && (book.status === "onloan" || book.status === "pending")
+  );
+
+  const publicBooks = lendingBooks.filter(
+    (book) => book.status === "available" || book.status === "pending"
+  );
+  const visiblePublicBooks =
+    publicQuery && activeTab === "books"
+      ? publicBooks.filter((book) => {
+          const q = publicQuery.trim().toLowerCase();
+          return (
+            (book.title || "").toLowerCase().includes(q) ||
+            (book.author || "").toLowerCase().includes(q) ||
+            (book.isbn || "").toLowerCase().includes(q) ||
+            (book.owner || "").toLowerCase().includes(q)
+          );
+        })
+      : publicBooks;
 
   const handleRequest = async (bookId) => {
     try {
-      setActionLoading({ id: bookId, type: 'request' });
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600));
-
-      const book = lendingBooks.find(b => b.id === bookId);
+      setActionLoading({ id: bookId, type: "request" });
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const book = lendingBooks.find((b) => b.id === bookId);
       if (!book) return;
-
       const user = StorageService.getUserProfile();
-      const requester = user?.fullName || user?.username || 'Requester';
-      const today = new Date().toISOString().split('T')[0];
-
-      // Update book as a pending request
-      StorageService.updateLendingBook(bookId, { status: 'pending', borrower: requester, dateRequested: today });
-
-      // Reload books
+      const requester = user?.fullName || user?.username || "Requester";
+      const today = new Date().toISOString().split("T")[0];
+      StorageService.updateLendingBook(bookId, {
+        status: "pending",
+        borrower: requester,
+        dateRequested: today,
+      });
       loadBooks();
-
       showToastNotification(`Request sent for "${book.title}". Owner will be notified.`, "success");
-      // Switch to Incoming Requests so owner can see it
-      setActiveTab('requests');
-    } catch (error) {
+      setActiveTab("requests");
+    } catch {
       showToastNotification("Unable to send request. Please try again.", "error");
     } finally {
       setActionLoading({ id: null, type: null });
     }
   };
-  // Edit modal state & handlers (professional admin edit)
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editBookData, setEditBookData] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
 
   const openEditModal = (bookId) => {
-    const book = lendingBooks.find(b => b.id === bookId);
+    const book = lendingBooks.find((b) => b.id === bookId);
     if (!book) return;
     setEditBookData({ ...book });
     setShowEditModal(true);
@@ -192,23 +235,22 @@ function MyBooks() {
     e.preventDefault();
     if (!editBookData) return;
     if (!editBookData.title || !editBookData.author) {
-      showToastNotification('Please provide title and author', 'error');
+      showToastNotification("Please provide title and author", "error");
       return;
     }
     setIsEditing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
       StorageService.updateLendingBook(editBookData.id, {
         title: editBookData.title.trim(),
         author: editBookData.author.trim(),
-        isbn: editBookData.isbn || editBookData.isbn === '' ? editBookData.isbn.trim() : editBookData.isbn,
+        isbn: editBookData.isbn ? editBookData.isbn.trim() : "",
       });
       loadBooks();
-      showToastNotification('Book updated successfully', 'success');
+      showToastNotification("Book updated successfully", "success");
       closeEditModal();
     } catch (err) {
-      console.error('Save edit failed', err);
-      showToastNotification('Unable to save changes', 'error');
+      showToastNotification("Unable to save changes", "error");
       setIsEditing(false);
     }
   };
@@ -222,31 +264,24 @@ function MyBooks() {
   const handleLogout = () => {
     StorageService.clearSession();
     showToastNotification("Logged out successfully", "success");
-    setTimeout(() => {
-      navigate("/");
-    }, 500);
+    setTimeout(() => navigate("/"), 500);
   };
 
   const handleApprove = async (bookId) => {
     try {
-      setActionLoading({ id: bookId, type: 'approve' });
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
-      const book = lendingBooks.find(b => b.id === bookId);
+      setActionLoading({ id: bookId, type: "approve" });
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const book = lendingBooks.find((b) => b.id === bookId);
       if (!book) return;
-
-      // Update in storage: mark as on loan and record borrowed date
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       StorageService.updateLendingBook(bookId, { status: "onloan", dateBorrowed: today });
-
-      // Reload books
       loadBooks();
-
-      showToastNotification(`Book request approved! ${book?.borrower || 'Borrower'} has been notified.`, "success");
-      // After approving, switch to 'Books I'm Lending' so admin sees on-loan books
-      setActiveTab('lending');
-    } catch (error) {
+      showToastNotification(
+        `Book request approved! ${book?.borrower || "Borrower"} has been notified.`,
+        "success"
+      );
+      setActiveTab("lending");
+    } catch {
       showToastNotification("An error occurred while approving the request", "error");
     } finally {
       setActionLoading({ id: null, type: null });
@@ -255,29 +290,22 @@ function MyBooks() {
 
   const handleDecline = async (bookId) => {
     try {
-      setActionLoading({ id: bookId, type: 'decline' });
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
-      const book = lendingBooks.find(b => b.id === bookId);
+      setActionLoading({ id: bookId, type: "decline" });
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const book = lendingBooks.find((b) => b.id === bookId);
       if (!book) return;
-
-      // Delete from storage
       StorageService.deleteLendingBook(bookId);
-      
-      // Reload books
       loadBooks();
-      
-      showToastNotification(`Book request from ${book?.borrower || 'Borrower'} has been declined.`, "success");
-    } catch (error) {
+      showToastNotification(`Book request from ${book?.borrower || "Borrower"} has been declined.`, "success");
+    } catch {
       showToastNotification("An error occurred while declining the request", "error");
     } finally {
       setActionLoading({ id: null, type: null });
     }
   };
 
-const openDeleteConfirm = (bookId) => {
-    const book = lendingBooks.find(b => b.id === bookId);
+  const openDeleteConfirm = (bookId) => {
+    const book = lendingBooks.find((b) => b.id === bookId);
     if (!book) return;
     setBookToDelete(book);
   };
@@ -287,17 +315,16 @@ const openDeleteConfirm = (bookId) => {
     setDeleteLoading(false);
   };
 
-const handleDeleteBook = async () => {
+  const handleDeleteBook = async () => {
     if (!bookToDelete) return;
     setDeleteLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       StorageService.deleteLendingBook(bookToDelete.id);
       loadBooks();
       showToastNotification(`"${bookToDelete.title}" has been removed.`, "success");
       closeDeleteConfirm();
-    } catch (error) {
-      console.error("Error deleting book:", error);
+    } catch {
       showToastNotification("Unable to delete book. Please try again.", "error");
       setDeleteLoading(false);
     }
@@ -305,252 +332,249 @@ const handleDeleteBook = async () => {
 
   return (
     <div className="dashboard-wrapper">
-      {/* Toast Notification */}
-      <Toast 
-        message={toastMessage} 
-        type={toastType} 
-        show={showToast} 
-        onClose={() => setShowToast(false)} 
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        show={showToast}
+        onClose={() => setShowToast(false)}
       />
-      
-      {/* --- Top Navigation Bar --- */}
+
       <nav className="navbar">
-        {/* LEFT SIDE: Logo */}
         <div className="logo-nav">
-            <img src="https://cdn-icons-png.flaticon.com/512/3004/3004613.png" alt="Logo"/>
-            <h1>Peer Reads</h1>
+          <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book logo"/>
+          <h1>Peer Reads</h1>
         </div>
-        
-        {/* RIGHT SIDE: Navigation Links and Log Out Button */}
         <div className="nav-links">
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/mybooks" className="active-link">My Books</Link>
+          <Link to="/dashboard">Books</Link>
+          <Link to="/mybooks" className="active-link">
+           Peer Reads
+          </Link>
           <Link to="/profile">Profile</Link>
-          
-          {/* Log Out button */}
-          <button 
-            className="logout-button nav-action-btn"
-            onClick={handleLogout}
-          >
+          <button className="logout-button nav-action-btn" onClick={handleLogout}>
             Log Out
           </button>
         </div>
       </nav>
 
-      {/* --- My Books Content (unchanged) --- */}
       <div className="mybooks-content">
-        <div className="books-container">
-          {/* Public Books section for users to request borrowing */}
-          <div className="public-books-panel">
-                    <h3 className="panel-title">Available Books</h3>
-            <table className="books-table public">
+        <section className="requests-section">
+          <h3 className="section-title">My Lending Requests</h3>
+          {pendingRequests.length > 0 ? (
+            <table className="books-table">
               <thead>
                 <tr>
                   <th>Book Title</th>
-                  <th>Owner</th>
-                  <th>Date Added</th>
+                  <th>Requester</th>
+                  <th>Date Requested</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {visiblePublicBooks.length > 0 ? (
-                  visiblePublicBooks.map(book => (
-                    <tr key={`public-${book.id}`} className={`book-row ${book.status === 'pending' ? 'pending' : ''}`}>
-                      <td>
-                        {book.title}
-                        {book.status === 'pending' && (
-                          <span className="pending-badge">Pending</span>
-                        )}
+                {pendingRequests.map((book) => (
+                  <BookItem
+                    key={book.id}
+                    {...book}
+                    onApprove={handleApprove}
+                    onDecline={handleDecline}
+                    onEdit={isAdmin || isOwner(book.owner) ? openEditModal : null}
+                    isProcessing={actionLoading.id === book.id}
+                    processingType={actionLoading.type}
+                    declineLabel="Cancel"
+                  />
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="empty-msg">No incoming requests at this time.</p>
+          )}
+        </section>
+
+        <section className="available-books-section">
+          <h3 className="section-title">Available Books</h3>
+          <table className="books-table public">
+            <thead>
+              <tr>
+                <th>Book Title</th>
+                <th>Owner</th>
+                <th>Date Added</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visiblePublicBooks.length > 0 ? (
+                visiblePublicBooks.map((book) => {
+                  const canEdit = isAdmin || isOwner(book.owner);
+                  return (
+                    <tr
+                      key={`public-${book.id}`}
+                      className={`book-row ${book.status === "pending" ? "pending" : ""}`}
+                    >
+                      <td style={{ display: "flex", alignItems: "center" }}>
+                        <img
+                          src={book.image || "https://via.placeholder.com/50x70?text=No+Cover"}
+                          alt={book.title}
+                          style={{
+                            width: 50,
+                            height: 70,
+                            objectFit: "cover",
+                            marginRight: 10,
+                            borderRadius: 4,
+                            flexShrink: 0,
+                          }}
+                        />
+                        {book.title}{" "}
+                        {book.status === "pending" && <span className="pending-badge">Pending</span>}
                       </td>
-                      <td>{book.owner || '-'}</td>
-                      <td>{book.dateAdded || '-'}</td>
+                      <td>{book.owner || "-"}</td>
+                      <td>{book.dateAdded || "-"}</td>
                       <td className="actions-cell">
-                          {book.owner && userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username) ? (
-                          // Owner controls: Delete only (Edit removed per admin preference)
-                          <>
-                            <button className="action-btn decline-btn" onClick={() => openDeleteConfirm(book.id)}>Delete</button>
-                          </>
+                        {canEdit ? (
+                          <button
+                            className="action-btn decline-btn"
+                            onClick={() => openDeleteConfirm(book.id)}
+                          >
+                            Delete
+                          </button>
+                        ) : book.status === "pending" ? (
+                          <button className="action-btn" disabled>
+                            Pending
+                          </button>
                         ) : (
-                          // If book is pending (someone already requested), show disabled indicator; otherwise allow Request
-                          book.status === 'pending' ? (
-                            <button className="action-btn" disabled>Pending</button>
-                          ) : (
-                            <button
-                              className="action-btn request-btn"
-                              onClick={() => handleRequest(book.id)}
-                              disabled={actionLoading.id === book.id}
-                            >
-                              {actionLoading.id === book.id && actionLoading.type === 'request' ? 'Sending request...' : 'Request to Borrow'}
-                            </button>
-                          )
+                          <button
+                            className="action-btn request-btn"
+                            onClick={() => handleRequest(book.id)}
+                            disabled={actionLoading.id === book.id}
+                          >
+                            {actionLoading.id === book.id && actionLoading.type === "request"
+                              ? "Sending request..."
+                              : "Request to Borrow"}
+                          </button>
                         )}
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr><td colSpan="4" style={{textAlign: 'center', padding: '18px'}}>No public books available.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="tabs-header">
-            <button 
-              className={`tab-btn ${activeTab === 'books' ? 'active' : ''}`}
-              onClick={() => setActiveTab('books')}
-            >
-              Available
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'lending' ? 'active' : ''}`}
-              onClick={() => setActiveTab('lending')}
-            >
-              My Lending
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
-              onClick={() => setActiveTab('requests')}
-            >
-              Requests
-            </button>
-          </div>
-          
-          <div className="tab-panel">
-            {/* Table View */}
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: "center", padding: "18px" }}>
+                    No public books available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </section>
+
+        <section className="lending-section">
+          <h3 className="section-title">My Lending</h3>
+          {lendingDisplay.length > 0 ? (
             <table className="books-table">
               <thead>
-                  <tr>
-                    <th>Book Title</th>
-                    <th>{activeTab === 'books' ? 'Owner' : activeTab === 'requests' ? 'Requester' : 'Borrower'}</th>
-                    <th>{activeTab === 'requests' ? 'Date Requested' : 'Date Added'}</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
+                <tr>
+                  <th>Book Title</th>
+                  <th>Borrower</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
               <tbody>
-                  {activeTab === 'lending' && lendingDisplay.length > 0 && lendingDisplay.map(book => (
-                  <BookItem 
-                    key={book.id} 
-                    {...book} 
-                      onApprove={book.status === 'pending' ? handleApprove : null}
-                      onDecline={book.status === 'pending' ? handleDecline : () => openDeleteConfirm(book.id)}
-                      onDelete={userProfile && (book.owner === userProfile.fullName || book.owner === userProfile.username) ? () => openDeleteConfirm(book.id) : null}
+                {lendingDisplay.map((book) => (
+                  <BookItem
+                    key={book.id}
+                    {...book}
+                    onApprove={book.status === "pending" ? handleApprove : null}
+                    onDecline={
+                      book.status === "pending" ? handleDecline : () => openDeleteConfirm(book.id)
+                    }
+                    onEdit={isAdmin || isOwner(book.owner) ? openEditModal : null}
                     isProcessing={actionLoading.id === book.id}
                     processingType={actionLoading.type}
                   />
                 ))}
-                
-                {activeTab === 'requests' && pendingRequests.length > 0 && pendingRequests.map(book => (
-                  <BookItem 
-                    key={book.id} 
-                    {...book} 
-                    onApprove={handleApprove}
-                    onDecline={handleDecline}
-                    isProcessing={actionLoading.id === book.id}
-                    processingType={actionLoading.type}
-                  />
-                ))}
-                
-                {activeTab === 'lending' && lendingDisplay.length === 0 && (
-                  <tr><td colSpan="4" style={{textAlign: 'center', padding: '30px'}}>You have not added any books for lending yet.</td></tr>
-                )}
-                {activeTab === 'requests' && pendingRequests.length === 0 && (
-                  <tr><td colSpan="4" style={{textAlign: 'center', padding: '30px'}}>No incoming requests at this time.</td></tr>
-                )}
               </tbody>
             </table>
-          </div>
-        </div>
+          ) : (
+            <p className="empty-msg">You have not added any books for lending yet.</p>
+          )}
+        </section>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Updated Delete Confirmation Modal - dashboard style */}
       {bookToDelete && (
-        <div className="modal-overlay" onClick={closeDeleteConfirm}>
-            <div className="modal-content confirm-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Remove Book</h2>
-                <button className="close-modal-btn" onClick={closeDeleteConfirm}>×</button>
-              </div>
-              <p>
-                Are you sure you want to remove <strong>{bookToDelete.title}</strong> from the library? This action cannot be undone.
-              </p>
-              <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={closeDeleteConfirm} disabled={deleteLoading}>
-                  Cancel
-                </button>
-                <button type="button" className="submit-btn danger-btn" onClick={handleDeleteBook} disabled={deleteLoading}>
-                  {deleteLoading ? (
-                    <>
-                      <span className="spinner" /> Removing...
-                    </>
-                  ) : (
-                    "Remove Book"
-                  )}
-                </button>
-              </div>
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h4>Delete Book</h4>
+              <button className="close-button" onClick={closeDeleteConfirm}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>"{bookToDelete.title}"</strong>?</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={closeDeleteConfirm}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={handleDeleteBook}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Delete"}
+              </button>
             </div>
           </div>
+        </div>
       )}
 
-      {/* Edit Book Modal (Admin) */}
+      {/* Edit Book Modal */}
       {showEditModal && editBookData && (
-        <div className="modal-overlay" onClick={closeEditModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Edit Book Details</h2>
-              <button className="close-modal-btn" onClick={closeEditModal}>×</button>
-            </div>
-            <form onSubmit={handleSaveEdit}>
-              <div className="modal-form-group">
-                <label>Book Title *</label>
+        <div className="modal-overlay">
+          <div className="modal-content edit-book-modal">
+            <h4>Edit Book Details</h4>
+            <form onSubmit={handleSaveEdit} className="edit-book-form">
+              <label>
+                Title
                 <input
                   type="text"
-                  placeholder="Enter book title"
                   value={editBookData.title}
-                  onChange={(e) => setEditBookData({...editBookData, title: e.target.value})}
+                  onChange={(e) =>
+                    setEditBookData({ ...editBookData, title: e.target.value })
+                  }
                   required
+                  autoFocus
                 />
-              </div>
-              <div className="modal-form-group">
-                <label>Author *</label>
+              </label>
+              <label>
+                Author
                 <input
                   type="text"
-                  placeholder="Enter author name"
-                  value={editBookData.author || ''}
-                  onChange={(e) => setEditBookData({...editBookData, author: e.target.value})}
+                  value={editBookData.author || ""}
+                  onChange={(e) =>
+                    setEditBookData({ ...editBookData, author: e.target.value })
+                  }
                   required
                 />
-              </div>
-              <div className="modal-form-group">
-                <label>ISBN (Optional)</label>
+              </label>
+              <label>
+                ISBN (optional)
                 <input
                   type="text"
-                  placeholder="Enter ISBN"
-                  value={editBookData.isbn || ''}
-                  onChange={(e) => setEditBookData({...editBookData, isbn: e.target.value})}
+                  value={editBookData.isbn || ""}
+                  onChange={(e) =>
+                    setEditBookData({ ...editBookData, isbn: e.target.value })
+                  }
                 />
-              </div>
+              </label>
               <div className="modal-actions">
-                <button 
-                  type="button" 
-                  className="cancel-btn" 
-                  onClick={closeEditModal}
-                  disabled={isEditing}
-                >
+                <button type="button" onClick={closeEditModal} disabled={isEditing}>
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  className="submit-btn"
-                  disabled={isEditing}
-                >
-                  {isEditing ? (
-                    <>
-                      <span className="spinner"></span>
-                      Saving
-                    </>
-                  ) : (
-                    "Save"
-                  )}
+                <button type="submit" disabled={isEditing}>
+                  {isEditing ? "Saving..." : "Save"}
                 </button>
               </div>
             </form>
