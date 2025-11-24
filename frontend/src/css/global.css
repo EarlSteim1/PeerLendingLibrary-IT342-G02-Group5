@@ -1,0 +1,78 @@
+/* Global variables (Peer Reads Figma V3) */
+:root {
+  --primary-green: #2ecc71; /* Logo/Text accent */
+  --button-blue: #007bff; /* Primary button accent */
+  --secondary-bg: #f7faff; /* Light background for left pane and body */
+  --auth-bg: #f6f5ef; /* dirty white for auth pages */
+  --text-dark: #333;
+  --text-medium: #555;
+  --border-color: #ddd;
+  --border-radius-small: 6px;
+  --border-radius-large: 12px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: var(--secondary-bg);
+  color: var(--text-dark);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Shared Titles */
+h2 {
+  color: var(--text-dark);
+  margin-bottom: 30px;
+  font-weight: 600;
+  text-align: left;
+  font-size: 2.2em; 
+}
+
+/* --- Card Container for Dashboard/Profile --- */
+.card-container {
+  width: 100%;
+  max-width: 1200px; /* widened to support full-screen layouts */
+  padding: 50px;
+  background-color: #fff;
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow);
+  text-align: center;
+  margin: 20px auto;
+}
+
+/* --- Secondary/Link Text --- */
+.link-text {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.link-text a {
+  color: var(--primary-green);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link-text a:hover {
+  text-decoration: underline;
+}
+
+/* --- Dashboard/Profile Specific Styles --- */
+.profile-picture {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--primary-green);
+  margin-bottom: 20px;
+}
+.dashboard-summary {
+  margin-top: 25px;
+  padding: 15px;
+  background-color: var(--light-gray);
+  border-radius: var(--border-radius-small);
+  text-align: left;
+}

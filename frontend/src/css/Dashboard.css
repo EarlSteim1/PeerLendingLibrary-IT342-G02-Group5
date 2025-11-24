@@ -1,0 +1,721 @@
+/* --- Dashboard Specific Styles --- */
+
+.dashboard-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* Resetting alignment from global.css for full-width layout */
+    margin: 0;
+    padding: 0;
+    background-color: #f6f7fb;
+}
+
+/* --- Navigation Bar --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Compact dashboard top search (single small button) */
+.dashboard-top-search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.dashboard-top-search input {
+    width: 280px;
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.08);
+    outline: none;
+    font-size: 14px;
+}
+
+.dashboard-top-search input:focus {
+    box-shadow: 0 4px 18px rgba(3, 102, 214, 0.08);
+    border-color: rgba(3,102,214,0.2);
+}
+
+.dashboard-top-search .search-submit {
+    padding: 8px 12px;
+    background: var(--button-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Floating search results below the top search */
+.search-results {
+    position: absolute;
+    top: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    max-height: 320px;
+    overflow: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(11,22,70,0.12);
+    z-index: 1200;
+    padding: 8px 6px;
+}
+
+.search-results .result-item{
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.search-results .result-item:hover{
+    background: #f6f7fb;
+}
+
+.logo-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-nav img {
+    width: 30px;
+    height: 30px;
+}
+
+.logo-nav h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+/* --- Dashboard Specific Styles --- */
+
+/* ... (Styles before nav-links remain the same) ... */
+
+.nav-links {
+    display: flex; 
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-medium);
+    margin-left: 25px; 
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+/* Updated Styles for the Log Out button */
+.nav-action-btn {
+    /* Resetting the boxy button look */
+    background: none; 
+    border: none;
+    color: #e74c3c; /* Red text for log out/danger action */
+    
+    /* Making it behave like a link */
+    padding: 0; /* Remove vertical padding */
+    padding-bottom: 2px; /* Small pad for hover effect */
+    margin-left: 30px; /* Spacing from Profile link */
+    
+    font-size: 1em; /* Standard text size */
+    font-weight: 500;
+    cursor: pointer;
+    width: auto;
+    
+    /* Removing border and box styling */
+    border-radius: 0;
+    transition: color 0.2s, border-bottom 0.2s;
+}
+
+.nav-action-btn:hover {
+    background: none; 
+    color: #c0392b; 
+    /* Add a subtle underline/border effect on hover */
+    border-bottom: 2px solid #c0392b; 
+}
+
+.nav-links a:hover {
+    color: var(--primary-green);
+}
+
+.nav-links .active-link {
+    color: var(--primary-green);
+    border-bottom: 2px solid var(--primary-green);
+    padding-bottom: 15px;
+}
+/* ... (Rest of the Dashboard.css remains the same) ... */
+
+/* --- Main Content Layout --- */
+.dashboard-content {
+    padding: 24px 32px;
+    flex-grow: 1;
+    background-color: transparent;
+}
+
+.welcome-header {
+    font-size: 1.5em;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: var(--text-medium);
+}
+
+/* --- Stat Cards Grid --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+/* New overall layout: sidebar + main + right column */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr 320px;
+    gap: 24px;
+    align-items: start;
+}
+
+.sidebar {
+    background: #5b4bd6; /* purple */
+    color: #fff;
+    min-height: calc(125vh - 0px);
+    padding: 28px 18px;
+}
+
+.sidebar .brand {
+    font-weight: 800;
+    font-size: 20px;
+    margin-bottom: 18px;
+}
+
+.sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.95);
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.sidebar .nav-item.active {
+    background: rgba(255,255,255,0.08);
+}
+
+.main-panel {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 6px 18px rgba(12,17,40,0.06);
+}
+
+.popular-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.popular-card {
+    background: linear-gradient(180deg,#ffffff 0%, #fbfbff 100%);
+    border-radius: 12px;
+    padding: 12px;
+    width: 160px;
+    box-shadow: 0 4px 12px rgba(12,17,40,0.04);
+}
+
+.popular-card img{
+    width:100%;
+    height:110px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-bottom:8px;
+}
+
+.mybooks-panel {
+    margin-top: 12px;
+}
+
+.book-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f3;
+}
+
+.right-column {
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.analytics-card {
+    background:#fff;
+    padding:14px;
+    border-radius:10px;
+    box-shadow:0 6px 18px rgba(12,17,40,0.04);
+}
+
+@media (max-width: 980px){
+    .dashboard-grid{grid-template-columns: 1fr;}
+    .sidebar{display:none}
+}
+
+.stat-card {
+    background-color: #fff;
+    border-radius: var(--border-radius-large);
+    padding: 25px;
+    box-shadow: var(--shadow);
+    position: relative;
+    color: white; /* Text color for cards */
+}
+
+.stat-card h3 {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.stat-number {
+    font-size: 2.5em;
+    font-weight: 700;
+    margin: 0;
+}
+
+.card-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 2em;
+    opacity: 0.2;
+}
+
+/* Card Colors (matching image: Books Lent (Teal/Green), Books Borrowed (Light Green), Pending (Orange)) */
+.lent-card { background-color: #58c9b9; } /* Teal/Green */
+.borrowed-card { background-color: #8ed6af; } /* Light Green */
+.pending-card { background-color: #ffb884; } /* Orange */
+
+
+/* --- Bottom Section: Find Books & Activity --- */
+.bottom-section {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start; /* Aligns content to the top */
+}
+
+.find-books-panel {
+    flex: 1.5; /* Takes up more space */
+    background-color: #fff;
+    padding: 25px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+}
+
+.activity-panel {
+    flex: 1; /* Takes up less space */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.find-books-panel h3, .activity-panel h3 {
+    color: var(--text-dark);
+    font-size: 1.3em;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.search-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* Modern, Facebook-like search box */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 40px 10px 42px; /* left padding for icon, right for clear */
+    border-radius: 999px; /* pill */
+    border: 1px solid rgba(0,0,0,0.08);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    font-size: 15px;
+    outline: none;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.search-box input:focus {
+    box-shadow: 0 4px 18px rgba(3, 102, 214, 0.12);
+    border-color: rgba(3, 102, 214, 0.25);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 16px;
+    color: rgba(0,0,0,0.45);
+}
+
+.clear-btn {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: rgba(0,0,0,0.45);
+}
+
+.search-submit {
+    padding: 10px 18px;
+    background: var(--button-blue);
+    color: #fff;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(3, 102, 214, 0.12);
+    transition: background 0.15s ease;
+}
+
+.search-submit:hover:not(:disabled) {
+    background: #0056b3;
+}
+
+/* Activity and My Books Boxes */
+.recent-activity-box, .my-books-box {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+}
+
+.recent-activity-box p, .my-books-box p {
+    margin: 10px 0;
+    color: var(--text-medium);
+    font-size: 15px;
+}
+
+.activity-detail {
+    font-style: italic;
+    color: var(--text-medium);
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    margin-top: 15px;
+}
+
+.my-books-box p {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--secondary-bg);
+}
+
+.my-books-box p:last-of-type {
+    border-bottom: none;
+    margin-bottom: 20px;
+}
+
+.add-book-btn {
+    background-color: var(--primary-green);
+    color: white;
+    font-weight: 500;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.8em;
+}
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: var(--text-medium);
+    padding: 0;
+    width: auto;
+    line-height: 1;
+}
+
+.close-modal-btn:hover {
+    color: var(--text-dark);
+}
+
+.modal-form-group {
+    margin-bottom: 20px;
+}
+
+.modal-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.modal-form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.cancel-btn, .submit-btn {
+    padding: 10px 20px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    width: auto;
+}
+
+.cancel-btn {
+    background-color: var(--border-color);
+    color: var(--text-dark);
+}
+
+.submit-btn {
+    background-color: var(--button-blue);
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #ccc;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.submit-btn .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Toast Notification Styles - Shared */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #fff;
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 10000;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.toast-show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast-success {
+    border-left-color: var(--primary-green);
+}
+
+.toast-error {
+    border-left-color: #e74c3c;
+}
+
+.toast-info {
+    border-left-color: var(--button-blue);
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.toast-icon {
+    font-size: 20px;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.toast-success .toast-icon {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--primary-green);
+}
+
+.toast-error .toast-icon {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.toast-info .toast-icon {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: var(--button-blue);
+}
+
+.toast-message {
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-medium);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.toast-close:hover {
+    background-color: #f0f0f0;
+    color: var(--text-dark);
+}
+
+/* Top search used in the main panel (compact, centered) */
+.top-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px; /* small breathing room under the search */
+}
+
+.top-search input {
+    width: 300px; /* average length */
+    max-width: 82%;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.08);
+    outline: none;
+    font-size: 14px;
+}
+
+.top-search input:focus {
+    box-shadow: 0 6px 20px rgba(3, 102, 214, 0.08);
+    border-color: rgba(3,102,214,0.18);
+}
+
+.top-search button {
+    padding: 8px 14px;
+    background: var(--button-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (max-width: 700px) {
+    .top-search input { width: 60%; }
+}
+
+/* Make +Add a New Book button bigger */
+.bigger-add-btn {
+  font-size: 1.1rem;
+  padding: 12px 22px;
+  font-weight: 700;
+  border-radius: 8px;
+  background-color: var(--button-blue);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 12px;
+  width: 100%;
+  text-align: center;
+}
+
+.bigger-add-btn:hover {
+  background-color: #0056d2;
+}

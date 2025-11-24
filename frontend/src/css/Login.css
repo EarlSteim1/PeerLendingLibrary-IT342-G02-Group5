@@ -1,0 +1,225 @@
+/* Full screen wrapper */
+.centered-page-wrapper {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--auth-bg); /* dirty white background for auth pages */
+  box-sizing: border-box;
+}
+
+/* Container fills full width and height */
+.login-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+/* Left and Right panels split screen */
+.left, .right {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Ensure right panel uses auth background (dirty white) */
+.right {
+  background-color: var(--auth-bg);
+}
+
+.left {
+  background-color: #f7faff;
+}
+
+/* Full-height background images for left panels */
+.left.login-left {
+  background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1400&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffffff;
+}
+
+.left.register-left {
+  background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1400&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffffff;
+}
+
+/* Hide inline small illustration when using background cover */
+.left .illustration {
+  display: none;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.logo img {
+  width: 48px;
+  height: 48px;
+}
+
+.left h1 {
+  font-weight: 700;
+  font-size: 28px;
+  margin: 0;
+}
+
+.left img.illustration {
+  max-width: 90%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.left h3 {
+  font-weight: 500;
+  color: #555;
+  font-size: 18px;
+  margin-top: 0;
+}
+
+/* Form box */
+.form-box {
+  width: 100%;
+  max-width: 420px; /* centered, not wide */
+  margin: 0 auto; /* ensure centering */
+  box-sizing: border-box;
+}
+
+.form-box h2 {
+  margin-bottom: 1.5rem;
+}
+
+/* Center form titles across auth pages */
+.form-box h2,
+.form-box h2 { /* explicit selector for consistency */
+  text-align: center;
+}
+
+/* Fixed small book icon at top-left for branding on auth pages */
+.app-top-left-icon {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 11000;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.97);
+  padding: 6px 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-top-left-icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.app-brand-text {
+  margin-left: 8px;
+  color: #000; /* visible black text per request */
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.6px;
+}
+
+/* Inputs full width */
+.input-group input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 16px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #007bff;
+}
+
+/* Icons inside inputs */
+.input-icon {
+  position: absolute;
+  margin-left: 10px;
+  pointer-events: none;
+  user-select: none;
+  font-size: 18px;
+  color: #888;
+}
+
+/* Remember me styling */
+.remember {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Buttons full width */
+button[type="submit"],
+.google-login-btn {
+  width: 100%;
+  border-radius: 6px;
+}
+
+/* Google button specifics */
+.google-login-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.google-icon {
+  display: inline-block;
+}
+
+/* Link text */
+.link-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Demo credentials card (visible on auth pages) */
+.demo-credentials {
+  background: transparent; /* no white box */
+  color: #333;
+  padding: 0;
+  box-shadow: none;
+  font-size: 13px; /* small */
+  line-height: 1.2;
+  margin-top: 12px;
+  text-align: center;
+}
+.demo-credentials .cred-row {
+  display: block;
+  margin: 3px 0;
+}
+.demo-credentials code {
+  background: transparent;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #111;
+}

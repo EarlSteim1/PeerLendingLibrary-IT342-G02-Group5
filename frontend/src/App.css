@@ -1,0 +1,221 @@
+/* Global variables (Peer Reads Figma V3 - Blue Button, Icon Inputs) */
+:root {
+  --primary-green: #2ecc71; /* Logo/Text accent */
+  --button-blue: #007bff; /* Button accent */
+  --secondary-bg: #f7faff; /* Light background for left pane */
+  --text-dark: #333;
+  --text-medium: #555;
+  --border-color: #ddd;
+  --border-radius-small: 6px;
+  --border-radius-large: 12px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: var(--secondary-bg);
+  color: var(--text-dark);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h2 {
+  color: var(--text-dark);
+  margin-bottom: 30px;
+  font-weight: 600;
+  text-align: left;
+  font-size: 2.2em; 
+}
+
+/* --- Login/Register Split-Screen Container --- */
+.login-container {
+  display: flex;
+  height: 90vh;
+  width: 90%; 
+  max-width: 1400px;
+  background-color: white;
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* LEFT SIDE */
+.left {
+  flex: 1;
+  background-color: var(--secondary-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 50px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute; 
+  top: 40px;
+  left: 50px;
+}
+
+.logo img {
+  width: 40px;
+  height: 40px;
+}
+
+.logo h1 {
+  font-size: 26px;
+  color: var(--text-dark);
+  font-weight: 600;
+  margin: 0;
+}
+
+.left .illustration {
+  width: 90%;
+  max-width: 550px;
+}
+
+.left h3 {
+  color: var(--text-medium);
+  font-weight: 500;
+  margin-top: 30px;
+  font-size: 1.1em;
+}
+
+/* RIGHT SIDE (Form) */
+.right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* --- Input Field Styling with Icons --- */
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 15px 14px 45px; /* Padding for icon */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    font-size: 17px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.input-group .input-icon {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: var(--text-medium);
+    font-size: 18px;
+}
+
+.input-group input:focus {
+    border-color: var(--button-blue);
+    outline: none;
+}
+
+/* --- Remember Me and Button --- */
+.remember {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+.remember input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.1);
+}
+
+button {
+  background-color: var(--button-blue); /* Blue button */
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: var(--border-radius-small);
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* --- Secondary/Link Text --- */
+.link-text {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.link-text a {
+  color: var(--primary-green);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link-text a:hover {
+  text-decoration: underline;
+}
+
+/* --- Card Container for Dashboard/Profile --- */
+.card-container {
+  width: 100%;
+  max-width: 550px;
+  padding: 50px;
+  background-color: #fff;
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow);
+  text-align: center;
+  margin: 20px auto; 
+}
+
+/* --- Responsive Layout for Mobile --- */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        width: 100%;
+        max-width: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .left {
+        min-height: 30vh;
+        padding-top: 80px; 
+    }
+    .logo {
+        position: relative;
+        top: auto;
+        left: auto;
+        margin-bottom: 20px;
+    }
+    .right {
+        padding: 40px 20px;
+    }
+    .form-box {
+        max-width: 100%;
+    }
+}
