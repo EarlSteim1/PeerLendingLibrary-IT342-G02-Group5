@@ -438,6 +438,17 @@
   transform: translateY(0);
 }
 
+.return-book-button-profile:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.return-book-button-profile:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .profile-main-container {

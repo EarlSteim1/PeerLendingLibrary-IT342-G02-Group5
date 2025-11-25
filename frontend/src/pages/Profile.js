@@ -33,6 +33,7 @@ function Profile() {
   });
   const [publicBooks, setPublicBooks] = useState([]);
   const [booksLent, setBooksLent] = useState([]);
+  const [returningBookId, setReturningBookId] = useState(null);
 
   useEffect(() => {
     if (!StorageService.isLoggedIn()) {
@@ -74,15 +75,26 @@ function Profile() {
           country: extendedData.country || "",
         });
 
-        // Filter books lent (books owned by user that are currently on loan)
+        // Filter books based on user role:
+        // - Admin: books lent (books owned by user that are currently on loan)
+        // - Regular user: books borrowed (books where user is the borrower)
         setPublicBooks(booksData || []);
-        const lent = (booksData || []).filter(book => {
+        const isAdmin = data?.role === "ADMIN";
+        const filteredBooks = (booksData || []).filter(book => {
           const status = (book.status || "").toUpperCase();
           if (status !== "ON_LOAN") return false;
-          if (!book.ownerId || !data?.id) return false;
-          return Number(book.ownerId) === Number(data.id);
+          
+          if (isAdmin) {
+            // Admin: show books they lent (books they own)
+            if (!book.ownerId || !data?.id) return false;
+            return Number(book.ownerId) === Number(data.id);
+          } else {
+            // Regular user: show books they borrowed
+            if (!book.borrowerEmail || !data?.email) return false;
+            return book.borrowerEmail.toLowerCase() === data.email.toLowerCase();
+          }
         });
-        setBooksLent(lent);
+        setBooksLent(filteredBooks);
       } catch (error) {
         console.error("Failed to load profile:", error);
         showToastNotification(
@@ -240,7 +252,51 @@ function Profile() {
     return diffDays;
   };
 
-  // Note: Removed handleReturnBook since these are books the user lent, not borrowed
+  const handleReturnBook = async (bookId, e) => {
+    if (e) {
+      e.stopPropagation(); // Prevent card click navigation
+    }
+    
+    if (!window.confirm("Are you sure you want to return this book?")) {
+      return;
+    }
+
+    try {
+      setReturningBookId(bookId);
+      await apiClient.post(`/books/${bookId}/return-borrowed`);
+      
+      // Reload books to update the list
+      const booksData = await apiClient.get("/books");
+      const data = StorageService.getUser();
+      
+      // Re-filter books based on user role
+      const isAdmin = data?.role === "ADMIN";
+      const filteredBooks = (booksData || []).filter(book => {
+        const status = (book.status || "").toUpperCase();
+        if (status !== "ON_LOAN") return false;
+        
+        if (isAdmin) {
+          if (!book.ownerId || !data?.id) return false;
+          return Number(book.ownerId) === Number(data.id);
+        } else {
+          if (!book.borrowerEmail || !data?.email) return false;
+          return book.borrowerEmail.toLowerCase() === data.email.toLowerCase();
+        }
+      });
+      setBooksLent(filteredBooks);
+      setPublicBooks(booksData || []);
+      
+      showToastNotification("Book returned successfully!", "success");
+    } catch (error) {
+      console.error("Error returning book:", error);
+      showToastNotification(
+        error?.response?.data?.message || "Failed to return book. Please try again.",
+        "error"
+      );
+    } finally {
+      setReturningBookId(null);
+    }
+  };
 
   return (
     <div className="profile-wrapper">
@@ -447,12 +503,18 @@ function Profile() {
             </form>
           </div>
 
-          {/* Books Lent Section */}
+          {/* Books Lent/Borrowed Section */}
           <div className="borrowed-books-section" ref={booksLentRef}>
-            <h3 className="section-title">Books Lent</h3>
+            <h3 className="section-title">
+              {userProfile?.role === "ADMIN" ? "Books Lent" : "Books Borrowed"}
+            </h3>
             {booksLent.length === 0 ? (
               <div className="empty-state">
-                <p>You haven't lent any books yet.</p>
+                <p>
+                  {userProfile?.role === "ADMIN" 
+                    ? "You haven't lent any books yet." 
+                    : "You haven't borrowed any books yet."}
+                </p>
               </div>
             ) : (
               <div className="borrowed-books-grid">
@@ -481,14 +543,29 @@ function Profile() {
                           <h4 className="book-title-small">{book.title}</h4>
                           <p className="book-author-small">{book.author || "Unknown Author"}</p>
                           <div className="book-dates-small">
-                            <div className="date-row">
-                              <span className="date-label-small">Lent to:</span>
-                              <span className="date-value-small">{book.borrowerEmail || "Unknown"}</span>
-                            </div>
-                            <div className="date-row">
-                              <span className="date-label-small">Borrowed:</span>
-                              <span className="date-value-small">{formatDate(book.dateBorrowed)}</span>
-                            </div>
+                            {userProfile?.role === "ADMIN" ? (
+                              <>
+                                <div className="date-row">
+                                  <span className="date-label-small">Lent to:</span>
+                                  <span className="date-value-small">{book.borrowerEmail || "Unknown"}</span>
+                                </div>
+                                <div className="date-row">
+                                  <span className="date-label-small">Borrowed:</span>
+                                  <span className="date-value-small">{formatDate(book.dateBorrowed)}</span>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="date-row">
+                                  <span className="date-label-small">Lent by:</span>
+                                  <span className="date-value-small">{book.ownerName || "Unknown"}</span>
+                                </div>
+                                <div className="date-row">
+                                  <span className="date-label-small">Borrowed:</span>
+                                  <span className="date-value-small">{formatDate(book.dateBorrowed)}</span>
+                                </div>
+                              </>
+                            )}
                             <div className="date-row">
                               <span className="date-label-small">Return by:</span>
                               <span className={`date-value-small ${isOverdue ? 'overdue' : ''}`}>
@@ -501,6 +578,16 @@ function Profile() {
                               </div>
                             )}
                           </div>
+                          {/* Return Book Button - Only for regular users (Books Borrowed) */}
+                          {userProfile?.role !== "ADMIN" && (
+                            <button
+                              className="return-book-button-profile"
+                              onClick={(e) => handleReturnBook(book.id, e)}
+                              disabled={returningBookId === book.id}
+                            >
+                              {returningBookId === book.id ? "Returning..." : "Return Book"}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
