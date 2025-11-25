@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Toast from "../components/Toast";
 import StorageService from "../utils/storage";
+import apiClient from "../api/client";
 import "../css/global.css"; 
 import "../css/Login.css"; 
 
@@ -81,48 +82,29 @@ function Register() {
     setLoading(true);
     
     try {
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      console.log("Registering:", formData);
-      
-      // Create user account (store users list) and save profile
-      const created = StorageService.addUser({
-        username: formData.email.trim(),
+      const response = await apiClient.post("/auth/register", {
+        fullName: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
-        fullName: formData.name.trim(),
-        role: 'user', // default role (removed role selection)
-        profile: {
-          fullName: formData.name.trim(),
-          email: formData.email.trim(),
-          role: 'user',
-          location: "Philippines",
-          bio: "Welcome to Peer Reads!",
-          joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-          profilePicture: "https://via.placeholder.com/120/ADD8E6/000000?text=👤",
-        }
       });
 
-      if (!created) {
-        showToastNotification('An account with that email already exists.', 'error');
-        setLoading(false);
-        return;
-      }
+      StorageService.saveSession(response);
 
-      // Set session for the newly created user
-      StorageService.setUserSession(created.username);
-      StorageService.saveUserProfile(created.profile);
-      
-      showToastNotification(`Registration successful! Welcome, ${formData.name}!`, "success");
-      
-      // Navigate after showing toast
+      showToastNotification(
+        `Registration successful! Welcome, ${formData.name}!`,
+        "success",
+      );
+
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1500); 
+      }, 1500);
     } catch (error) {
       console.error("Registration Error:", error);
-      showToastNotification("An error occurred during registration. Please try again.", "error");
+      showToastNotification(
+        error.message ||
+          "An error occurred during registration. Please try again.",
+        "error",
+      );
     } finally {
       setLoading(false);
     }

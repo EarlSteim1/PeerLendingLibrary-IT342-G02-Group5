@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Toast from "../components/Toast";
 import StorageService from "../utils/storage";
+import apiClient from "../api/client";
 import "../css/global.css";
 import "../css/Dashboard.css"; 
 import "../css/MyBooks.css";
@@ -36,9 +37,24 @@ const BookItem = ({
   onEdit,
   isProcessing,
   processingType,
-  declineLabel = "Delete"
-}) => (
-  <tr className={`book-row ${status === 'pending' ? 'pending' : ''}`}>
+  declineLabel = "Delete",
+}) => {
+  const normalizedStatus = (status || "").toUpperCase();
+  const statusClass =
+    normalizedStatus === "ON_LOAN"
+      ? "onloan"
+      : normalizedStatus === "PENDING"
+        ? "pending"
+        : "available";
+  const statusLabel =
+    normalizedStatus === "ON_LOAN"
+      ? "On Loan"
+      : normalizedStatus === "PENDING"
+        ? "Pending"
+        : "Available";
+
+  return (
+  <tr className={`book-row ${normalizedStatus === 'PENDING' ? 'pending' : ''}`}>
     <td style={{ display: "flex", alignItems: "center" }}>
       <img
         src={image || "https://via.placeholder.com/50x70?text=No+Cover"}
@@ -53,14 +69,14 @@ const BookItem = ({
         }}
       />
       {title}
-      {status === 'pending' && (
+      {normalizedStatus === 'PENDING' && (
         <span className="pending-badge">Pending</span>
       )}
     </td>
     <td>{borrower || owner || '-'}</td>
     <td>{dateRequested || dateAdded || '-'}</td>
     <td className="actions-cell">
-      {status === 'pending' && onApprove && onDecline ? (
+      {normalizedStatus === 'PENDING' && onApprove && onDecline ? (
         <>
           <button
             className="action-btn approve-btn"
@@ -96,43 +112,83 @@ const BookItem = ({
             {onDecline && <button className="action-btn decline-btn" onClick={() => onDecline(id)} disabled={isProcessing}>{isProcessing && processingType === 'decline' ? 'Deleting...' : 'Delete'}</button>}
           </>
         ) : (
-          <span className={`status-tag ${status}`}>
-            {status === 'onloan' ? 'On Loan' : status === 'pending' ? 'Pending' : 'Available'}
+          <span className={`status-tag ${statusClass}`}>
+            {statusLabel}
           </span>
         )
       )}
     </td>
   </tr>
-);
+)};
 
 function MyBooks() {
   const [activeTab, setActiveTab] = useState("books");
   const navigate = useNavigate();
   const location = useLocation();
-  const [userProfile, setUserProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState(StorageService.getUser());
   const [publicQuery, setPublicQuery] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
   const [actionLoading, setActionLoading] = useState({ id: null, type: null });
   const [lendingBooks, setLendingBooks] = useState([]);
-  const [borrowingBooks, setBorrowingBooks] = useState([]);
+  const [publicBooks, setPublicBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [bookToDelete, setBookToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editBookData, setEditBookData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [bookToApprove, setBookToApprove] = useState(null);
+  const [returnDate, setReturnDate] = useState("");
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [bookToRequest, setBookToRequest] = useState(null);
+  const [requestReturnDate, setRequestReturnDate] = useState("");
+
+  const showToastNotification = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
+
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      const [profileData, myBooksData, publicBooksData] = await Promise.all([
+        apiClient.get("/users/me"),
+        apiClient.get("/books/mine"),
+        apiClient.get("/books"),
+      ]);
+      setUserProfile(profileData);
+      StorageService.updateUser(profileData);
+      setLendingBooks(myBooksData || []);
+      setPublicBooks(publicBooksData || []);
+    } catch (error) {
+      console.error("Failed to load books:", error);
+      showToastNotification(
+        error.message || "Unable to load books. Please try again.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!StorageService.isLoggedIn()) {
       navigate("/");
       return;
     }
-    loadBooks();
-
-    const profile = StorageService.getUserProfile();
-    if (profile) setUserProfile(profile);
+    // Check if user is admin
+    const currentUser = StorageService.getUser();
+    if (currentUser?.role !== "ADMIN") {
+      showToastNotification("Access denied. Only administrators can access this page.", "error");
+      navigate("/dashboard");
+      return;
+    }
+    fetchBooks();
 
     if (location?.state && location.state.tab) {
       setActiveTab(location.state.tab);
@@ -144,79 +200,131 @@ function MyBooks() {
     }
   }, [navigate, location]);
 
-  const loadBooks = () => {
-    const lending = (StorageService.getLendingBooks() || []).map(book => ({
-      ...book,
-      image: getRandomCover(),
-    }));
-
-    const borrowing = (StorageService.getBorrowingBooks() || []).map(book => ({
-      ...book,
-      image: getRandomCover(),
-    }));
-
-    setLendingBooks(lending);
-    setBorrowingBooks(borrowing);
+  const isOwner = (ownerId) => {
+    if (!userProfile || ownerId === undefined || ownerId === null) return false;
+    return Number(ownerId) === Number(userProfile.id);
   };
 
-  const isOwner = (bookOwner) => {
-    if (!userProfile || !bookOwner) return false;
-    const bookOwnerNorm = bookOwner.trim().toLowerCase();
-    const fullNameNorm = userProfile.fullName?.trim().toLowerCase() || "";
-    const usernameNorm = userProfile.username?.trim().toLowerCase() || "";
-    return bookOwnerNorm === fullNameNorm || bookOwnerNorm === usernameNorm;
-  };
-
-  const isAdmin = userProfile?.role === "admin";
+  const isAdmin = userProfile?.role === "ADMIN";
 
   const pendingRequests = lendingBooks.filter(
-    (book) => book.status === "pending" && (isAdmin || isOwner(book.owner))
+    (book) => book.status === "PENDING" && (isAdmin || isOwner(book.ownerId))
   );
 
   const lendingDisplay = lendingBooks.filter(
-    (book) =>
-      (isAdmin || isOwner(book.owner)) && (book.status === "onloan" || book.status === "pending")
+    (book) => isAdmin || isOwner(book.ownerId)
   );
 
-  const publicBooks = lendingBooks.filter(
-    (book) => book.status === "available" || book.status === "pending"
+  const borrowingBooks = (publicBooks || []).filter((book) => {
+    if (!book.borrowerEmail || !userProfile?.email) return false;
+    return book.borrowerEmail.toLowerCase() === userProfile.email.toLowerCase();
+  });
+
+  const availablePublicBooks = publicBooks.filter(
+    (book) => {
+      const status = (book.status || "").toUpperCase();
+      // Show all AVAILABLE books, including admin's own books (so admins can see books they added)
+      // For regular users, exclude their own books from the available list
+      if (status !== "AVAILABLE") return false;
+      if (isAdmin) return true; // Admins see all available books including their own
+      return !userProfile?.id || Number(book.ownerId) !== Number(userProfile.id);
+    }
   );
+
   const visiblePublicBooks =
     publicQuery && activeTab === "books"
-      ? publicBooks.filter((book) => {
+      ? availablePublicBooks.filter((book) => {
           const q = publicQuery.trim().toLowerCase();
           return (
             (book.title || "").toLowerCase().includes(q) ||
             (book.author || "").toLowerCase().includes(q) ||
             (book.isbn || "").toLowerCase().includes(q) ||
-            (book.owner || "").toLowerCase().includes(q)
+            (book.ownerName || "").toLowerCase().includes(q)
           );
         })
-      : publicBooks;
+      : availablePublicBooks;
 
-  const handleRequest = async (bookId) => {
+  const openRequestModal = (bookId) => {
+    const book = publicBooks.find((b) => b.id === bookId);
+    if (!book) return;
+    setBookToRequest(book);
+    // Set default return date to 30 days from now
+    const defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() + 30);
+    setRequestReturnDate(defaultDate.toISOString().split('T')[0]);
+    setShowRequestModal(true);
+  };
+
+  const closeRequestModal = () => {
+    setShowRequestModal(false);
+    setBookToRequest(null);
+    setRequestReturnDate("");
+  };
+
+  const handleRequest = async () => {
+    if (!bookToRequest || !requestReturnDate) {
+      showToastNotification("Please select a return date", "error");
+      return;
+    }
+    
     try {
-      setActionLoading({ id: bookId, type: "request" });
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      const book = lendingBooks.find((b) => b.id === bookId);
-      if (!book) return;
-      const user = StorageService.getUserProfile();
-      const requester = user?.fullName || user?.username || "Requester";
-      const today = new Date().toISOString().split("T")[0];
-      StorageService.updateLendingBook(bookId, {
-        status: "pending",
-        borrower: requester,
-        dateRequested: today,
+      setActionLoading({ id: bookToRequest.id, type: "request" });
+      if (!userProfile) {
+        throw new Error("Unable to request without a profile");
+      }
+      await apiClient.post(`/books/${bookToRequest.id}/request`, {
+        borrowerName: userProfile.fullName || userProfile.username || userProfile.email,
+        borrowerEmail: userProfile.email,
+        returnDate: requestReturnDate
       });
-      loadBooks();
-      showToastNotification(`Request sent for "${book.title}". Owner will be notified.`, "success");
+      await fetchBooks();
+      showToastNotification(
+        `Request sent for "${bookToRequest?.title || "book"}". Owner will be notified.`,
+        "success"
+      );
       setActiveTab("requests");
-    } catch {
-      showToastNotification("Unable to send request. Please try again.", "error");
+      closeRequestModal();
+    } catch (error) {
+      showToastNotification(
+        error?.response?.data?.message || "Unable to send request. Please try again.",
+        "error"
+      );
     } finally {
       setActionLoading({ id: null, type: null });
     }
   };
+
+  const sortByTitle = (list = []) => {
+    return [...list].sort((a, b) =>
+      (a.title || "").localeCompare(b.title || "", undefined, { sensitivity: "base" })
+    );
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const renderStatusPill = (status) => {
+    const normalized = (status || "").toUpperCase();
+    const label =
+      normalized === "ON_LOAN"
+        ? "On Loan"
+        : normalized === "PENDING"
+        ? "Pending"
+        : "Available";
+    return <span className={`status-pill ${normalized.toLowerCase()}`}>{label}</span>;
+  };
+
+  const sortedPendingRequests = sortByTitle(pendingRequests);
+  const sortedVisiblePublicBooks = sortByTitle(visiblePublicBooks);
+  const sortedBorrowingBooks = sortByTitle(borrowingBooks);
+  const sortedLendingDisplay = sortByTitle(lendingDisplay);
 
   const openEditModal = (bookId) => {
     const book = lendingBooks.find((b) => b.id === bookId);
@@ -240,13 +348,14 @@ function MyBooks() {
     }
     setIsEditing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      StorageService.updateLendingBook(editBookData.id, {
+      await apiClient.put(`/books/${editBookData.id}`, {
         title: editBookData.title.trim(),
         author: editBookData.author.trim(),
         isbn: editBookData.isbn ? editBookData.isbn.trim() : "",
+        imageUrl: editBookData.imageUrl,
+        genre: editBookData.genre || undefined,
       });
-      loadBooks();
+      await fetchBooks();
       showToastNotification("Book updated successfully", "success");
       closeEditModal();
     } catch (err) {
@@ -255,34 +364,52 @@ function MyBooks() {
     }
   };
 
-  const showToastNotification = (message, type = "success") => {
-    setToastMessage(message);
-    setToastType(type);
-    setShowToast(true);
-  };
-
   const handleLogout = () => {
     StorageService.clearSession();
     showToastNotification("Logged out successfully", "success");
     setTimeout(() => navigate("/"), 500);
   };
 
-  const handleApprove = async (bookId) => {
+  const openApproveModal = (bookId) => {
+    const book = lendingBooks.find((b) => b.id === bookId);
+    if (!book) return;
+    setBookToApprove(book);
+    // Set default return date to 30 days from now
+    const defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() + 30);
+    setReturnDate(defaultDate.toISOString().split('T')[0]);
+    setShowApproveModal(true);
+  };
+
+  const closeApproveModal = () => {
+    setShowApproveModal(false);
+    setBookToApprove(null);
+    setReturnDate("");
+  };
+
+  const handleApprove = async () => {
+    if (!bookToApprove || !returnDate) {
+      showToastNotification("Please select a return date", "error");
+      return;
+    }
+
     try {
-      setActionLoading({ id: bookId, type: "approve" });
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      const book = lendingBooks.find((b) => b.id === bookId);
-      if (!book) return;
-      const today = new Date().toISOString().split("T")[0];
-      StorageService.updateLendingBook(bookId, { status: "onloan", dateBorrowed: today });
-      loadBooks();
+      setActionLoading({ id: bookToApprove.id, type: "approve" });
+      await apiClient.post(`/books/${bookToApprove.id}/approve`, {
+        returnDate: returnDate
+      });
+      await fetchBooks();
       showToastNotification(
-        `Book request approved! ${book?.borrower || "Borrower"} has been notified.`,
+        `Book request approved! ${bookToApprove?.borrowerName || "Borrower"} has been notified.`,
         "success"
       );
       setActiveTab("lending");
-    } catch {
-      showToastNotification("An error occurred while approving the request", "error");
+      closeApproveModal();
+    } catch (error) {
+      showToastNotification(
+        error?.response?.data?.message || "An error occurred while approving the request",
+        "error"
+      );
     } finally {
       setActionLoading({ id: null, type: null });
     }
@@ -291,12 +418,11 @@ function MyBooks() {
   const handleDecline = async (bookId) => {
     try {
       setActionLoading({ id: bookId, type: "decline" });
-      await new Promise((resolve) => setTimeout(resolve, 600));
       const book = lendingBooks.find((b) => b.id === bookId);
       if (!book) return;
-      StorageService.deleteLendingBook(bookId);
-      loadBooks();
-      showToastNotification(`Book request from ${book?.borrower || "Borrower"} has been declined.`, "success");
+      await apiClient.post(`/books/${bookId}/decline`);
+      await fetchBooks();
+      showToastNotification(`Book request from ${book?.borrowerName || "Borrower"} has been declined.`, "success");
     } catch {
       showToastNotification("An error occurred while declining the request", "error");
     } finally {
@@ -305,8 +431,29 @@ function MyBooks() {
   };
 
   const openDeleteConfirm = (bookId) => {
-    const book = lendingBooks.find((b) => b.id === bookId);
+    const book =
+      lendingBooks.find((b) => b.id === bookId) ||
+      publicBooks.find((b) => b.id === bookId);
     if (!book) return;
+    
+    // Check if book is currently lent or borrowed
+    const status = (book.status || "").toUpperCase();
+    if (status === "ON_LOAN") {
+      showToastNotification(
+        `Warning: "${book.title}" is currently on loan to ${book.borrowerName || "a borrower"}. The book must be returned before it can be deleted.`,
+        "error"
+      );
+      return;
+    }
+    
+    if (status === "PENDING") {
+      showToastNotification(
+        `Warning: "${book.title}" has pending requests. Please approve or decline the request first before deleting.`,
+        "error"
+      );
+      return;
+    }
+    
     setBookToDelete(book);
   };
 
@@ -317,15 +464,27 @@ function MyBooks() {
 
   const handleDeleteBook = async () => {
     if (!bookToDelete) return;
+    
+    // Double-check status before deletion
+    const status = (bookToDelete.status || "").toUpperCase();
+    if (status === "ON_LOAN" || status === "PENDING") {
+      showToastNotification(
+        `Cannot delete "${bookToDelete.title}". The book is currently ${status === "ON_LOAN" ? "on loan" : "pending"}.`,
+        "error"
+      );
+      closeDeleteConfirm();
+      return;
+    }
+    
     setDeleteLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      StorageService.deleteLendingBook(bookToDelete.id);
-      loadBooks();
+      await apiClient.delete(`/books/${bookToDelete.id}`);
+      await fetchBooks();
       showToastNotification(`"${bookToDelete.title}" has been removed.`, "success");
       closeDeleteConfirm();
-    } catch {
-      showToastNotification("Unable to delete book. Please try again.", "error");
+    } catch (error) {
+      const errorMessage = error?.response?.data?.message || "Unable to delete book. Please try again.";
+      showToastNotification(errorMessage, "error");
       setDeleteLoading(false);
     }
   };
@@ -345,9 +504,10 @@ function MyBooks() {
           <h1>Peer Reads</h1>
         </div>
         <div className="nav-links">
-          <Link to="/dashboard">Books</Link>
+          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/books">Browse</Link>
           <Link to="/mybooks" className="active-link">
-           Peer Reads
+            Peer Reads
           </Link>
           <Link to="/profile">Profile</Link>
           <button className="logout-button nav-action-btn" onClick={handleLogout}>
@@ -356,10 +516,16 @@ function MyBooks() {
         </div>
       </nav>
 
+      {loading && (
+        <div className="loading-banner">
+          Loading your library...
+        </div>
+      )}
+
       <div className="mybooks-content">
         <section className="requests-section">
           <h3 className="section-title">My Lending Requests</h3>
-          {pendingRequests.length > 0 ? (
+          {sortedPendingRequests.length > 0 ? (
             <table className="books-table">
               <thead>
                 <tr>
@@ -370,13 +536,20 @@ function MyBooks() {
                 </tr>
               </thead>
               <tbody>
-                {pendingRequests.map((book) => (
+                {sortedPendingRequests.map((book) => (
                   <BookItem
                     key={book.id}
-                    {...book}
-                    onApprove={handleApprove}
+                    id={book.id}
+                    title={book.title}
+                    borrower={book.borrowerName}
+                    dateRequested={book.dateRequested}
+                    dateAdded={book.dateAdded}
+                    status={book.status}
+                    owner={book.ownerName}
+                    image={book.imageUrl || getRandomCover()}
+                    onApprove={openApproveModal}
                     onDecline={handleDecline}
-                    onEdit={isAdmin || isOwner(book.owner) ? openEditModal : null}
+                    onEdit={isAdmin || isOwner(book.ownerId) ? openEditModal : null}
                     isProcessing={actionLoading.id === book.id}
                     processingType={actionLoading.type}
                     declineLabel="Cancel"
@@ -401,17 +574,18 @@ function MyBooks() {
               </tr>
             </thead>
             <tbody>
-              {visiblePublicBooks.length > 0 ? (
-                visiblePublicBooks.map((book) => {
-                  const canEdit = isAdmin || isOwner(book.owner);
+              {sortedVisiblePublicBooks.length > 0 ? (
+                sortedVisiblePublicBooks.map((book) => {
+                  const canEdit = isAdmin || isOwner(book.ownerId);
+                  const status = (book.status || "").toUpperCase();
                   return (
                     <tr
                       key={`public-${book.id}`}
-                      className={`book-row ${book.status === "pending" ? "pending" : ""}`}
+                      className={`book-row ${status === "PENDING" ? "pending" : ""}`}
                     >
                       <td style={{ display: "flex", alignItems: "center" }}>
                         <img
-                          src={book.image || "https://via.placeholder.com/50x70?text=No+Cover"}
+                          src={book.imageUrl || "https://via.placeholder.com/50x70?text=No+Cover"}
                           alt={book.title}
                           style={{
                             width: 50,
@@ -423,9 +597,9 @@ function MyBooks() {
                           }}
                         />
                         {book.title}{" "}
-                        {book.status === "pending" && <span className="pending-badge">Pending</span>}
+                        {status === "PENDING" && <span className="pending-badge">Pending</span>}
                       </td>
-                      <td>{book.owner || "-"}</td>
+                      <td>{book.ownerName || "-"}</td>
                       <td>{book.dateAdded || "-"}</td>
                       <td className="actions-cell">
                         {canEdit ? (
@@ -435,14 +609,14 @@ function MyBooks() {
                           >
                             Delete
                           </button>
-                        ) : book.status === "pending" ? (
+                        ) : status === "PENDING" ? (
                           <button className="action-btn" disabled>
                             Pending
                           </button>
                         ) : (
                           <button
                             className="action-btn request-btn"
-                            onClick={() => handleRequest(book.id)}
+                            onClick={() => openRequestModal(book.id)}
                             disabled={actionLoading.id === book.id}
                           >
                             {actionLoading.id === book.id && actionLoading.type === "request"
@@ -467,30 +641,90 @@ function MyBooks() {
 
         <section className="lending-section">
           <h3 className="section-title">My Lending</h3>
-          {lendingDisplay.length > 0 ? (
+          {sortedLendingDisplay.length > 0 ? (
             <table className="books-table">
               <thead>
                 <tr>
                   <th>Book Title</th>
                   <th>Borrower</th>
-                  <th>Date</th>
+                  <th>Borrowed On</th>
+                  <th>Return By</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {lendingDisplay.map((book) => (
-                  <BookItem
-                    key={book.id}
-                    {...book}
-                    onApprove={book.status === "pending" ? handleApprove : null}
-                    onDecline={
-                      book.status === "pending" ? handleDecline : () => openDeleteConfirm(book.id)
-                    }
-                    onEdit={isAdmin || isOwner(book.owner) ? openEditModal : null}
-                    isProcessing={actionLoading.id === book.id}
-                    processingType={actionLoading.type}
-                  />
-                ))}
+                {sortedLendingDisplay.map((book) => {
+                  const status = (book.status || "").toUpperCase();
+                  const isPending = status === "PENDING";
+                  return (
+                    <tr key={`lending-${book.id}`}>
+                      <td style={{ display: "flex", alignItems: "center" }}>
+                        <img
+                          src={book.imageUrl || getRandomCover()}
+                          alt={book.title}
+                          style={{
+                            width: 50,
+                            height: 70,
+                            objectFit: "cover",
+                            marginRight: 10,
+                            borderRadius: 6,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{book.title}</div>
+                          <div style={{ fontSize: "0.85rem", color: "var(--text-medium)" }}>
+                            {book.author || "Unknown Author"}
+                          </div>
+                        </div>
+                      </td>
+                      <td>{book.borrowerName || "—"}</td>
+                      <td>{formatDate(book.dateBorrowed || book.dateAdded)}</td>
+                      <td>{formatDate(book.dateReturn)}</td>
+                      <td>{renderStatusPill(book.status)}</td>
+                      <td className="actions-cell">
+                        {isPending ? (
+                          <>
+                            <button
+                              className="action-btn approve-btn"
+                              onClick={() => openApproveModal(book.id)}
+                              disabled={actionLoading.id === book.id && actionLoading.type === "approve"}
+                            >
+                              {actionLoading.id === book.id && actionLoading.type === "approve"
+                                ? "Approving..."
+                                : "Approve"}
+                            </button>
+                            <button
+                              className="action-btn decline-btn"
+                              onClick={() => handleDecline(book.id)}
+                              disabled={actionLoading.id === book.id && actionLoading.type === "decline"}
+                            >
+                              {actionLoading.id === book.id && actionLoading.type === "decline"
+                                ? "Declining..."
+                                : "Cancel"}
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="action-btn edit-btn"
+                              onClick={() => openEditModal(book.id)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="action-btn decline-btn"
+                              onClick={() => openDeleteConfirm(book.id)}
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           ) : (
@@ -509,6 +743,41 @@ function MyBooks() {
             </div>
             <div className="modal-body">
               <p>Are you sure you want to delete <strong>"{bookToDelete.title}"</strong>?</p>
+              {(() => {
+                const status = (bookToDelete.status || "").toUpperCase();
+                const isOnLoan = status === "ON_LOAN";
+                const isPending = status === "PENDING";
+                const hasBorrower = bookToDelete.borrowerName;
+                
+                if (isOnLoan || isPending) {
+                  return (
+                    <div style={{
+                      marginTop: '16px',
+                      padding: '12px',
+                      backgroundColor: '#fff3cd',
+                      border: '2px solid #ffc107',
+                      borderRadius: '8px',
+                      color: '#856404'
+                    }}>
+                      <p style={{ margin: 0, fontWeight: 600, marginBottom: '8px' }}>
+                        ⚠️ Warning: This book cannot be deleted!
+                      </p>
+                      {isOnLoan && (
+                        <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                          This book is currently <strong>on loan</strong> to <strong>{hasBorrower || "a borrower"}</strong>. 
+                          The book must be returned first before it can be deleted.
+                        </p>
+                      )}
+                      {isPending && (
+                        <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                          This book has <strong>pending requests</strong>. Please approve or decline the request first before deleting.
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
             <div className="modal-footer">
               <button
@@ -521,7 +790,11 @@ function MyBooks() {
               <button
                 className="btn btn-danger"
                 onClick={handleDeleteBook}
-                disabled={deleteLoading}
+                disabled={deleteLoading || (bookToDelete.status || "").toUpperCase() === "ON_LOAN" || (bookToDelete.status || "").toUpperCase() === "PENDING"}
+                style={{
+                  opacity: ((bookToDelete.status || "").toUpperCase() === "ON_LOAN" || (bookToDelete.status || "").toUpperCase() === "PENDING") ? 0.5 : 1,
+                  cursor: ((bookToDelete.status || "").toUpperCase() === "ON_LOAN" || (bookToDelete.status || "").toUpperCase() === "PENDING") ? 'not-allowed' : 'pointer'
+                }}
               >
                 {deleteLoading ? "Deleting..." : "Delete"}
               </button>
@@ -532,52 +805,290 @@ function MyBooks() {
 
       {/* Edit Book Modal */}
       {showEditModal && editBookData && (
-        <div className="modal-overlay">
-          <div className="modal-content edit-book-modal">
-            <h4>Edit Book Details</h4>
-            <form onSubmit={handleSaveEdit} className="edit-book-form">
-              <label>
-                Title
+        <div className="modal-overlay" onClick={closeEditModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h4>Edit Book Details</h4>
+              <button className="close-button" onClick={closeEditModal}>×</button>
+            </div>
+            <form onSubmit={handleSaveEdit} className="modal-body">
+              <div className="modal-form-group">
+                <label htmlFor="edit-title">Title *</label>
                 <input
                   type="text"
+                  id="edit-title"
                   value={editBookData.title}
                   onChange={(e) =>
                     setEditBookData({ ...editBookData, title: e.target.value })
                   }
                   required
                   autoFocus
+                  placeholder="Enter book title"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: 'var(--border-radius-medium)',
+                    fontSize: '1rem',
+                    marginTop: '8px',
+                    transition: 'var(--transition)'
+                  }}
                 />
-              </label>
-              <label>
-                Author
+              </div>
+              <div className="modal-form-group">
+                <label htmlFor="edit-author">Author *</label>
                 <input
                   type="text"
+                  id="edit-author"
                   value={editBookData.author || ""}
                   onChange={(e) =>
                     setEditBookData({ ...editBookData, author: e.target.value })
                   }
                   required
+                  placeholder="Enter author name"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: 'var(--border-radius-medium)',
+                    fontSize: '1rem',
+                    marginTop: '8px',
+                    transition: 'var(--transition)'
+                  }}
                 />
-              </label>
-              <label>
-                ISBN (optional)
+              </div>
+              <div className="modal-form-group">
+                <label htmlFor="edit-isbn">ISBN (Optional)</label>
                 <input
                   type="text"
+                  id="edit-isbn"
                   value={editBookData.isbn || ""}
                   onChange={(e) =>
                     setEditBookData({ ...editBookData, isbn: e.target.value })
                   }
+                  placeholder="Enter ISBN"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: 'var(--border-radius-medium)',
+                    fontSize: '1rem',
+                    marginTop: '8px',
+                    transition: 'var(--transition)'
+                  }}
                 />
-              </label>
-              <div className="modal-actions">
-                <button type="button" onClick={closeEditModal} disabled={isEditing}>
+              </div>
+              {editBookData.genre !== undefined && (
+                <div className="modal-form-group">
+                  <label htmlFor="edit-genre">Genre (Optional)</label>
+                  <select
+                    id="edit-genre"
+                    value={editBookData.genre || ""}
+                    onChange={(e) =>
+                      setEditBookData({ ...editBookData, genre: e.target.value })
+                    }
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid var(--border-color)',
+                      borderRadius: 'var(--border-radius-medium)',
+                      fontSize: '1rem',
+                      marginTop: '8px',
+                      backgroundColor: '#fff',
+                      transition: 'var(--transition)'
+                    }}
+                  >
+                    <option value="">Select a genre</option>
+                    <option value="ANIME">Anime</option>
+                    <option value="ROMANCE">Romance</option>
+                    <option value="ACTION">Action</option>
+                    <option value="HORROR">Horror</option>
+                    <option value="FANTASY">Fantasy</option>
+                  </select>
+                </div>
+              )}
+              <div className="modal-actions" style={{ 
+                display: 'flex', 
+                justifyContent: 'flex-end', 
+                gap: '12px',
+                padding: '16px 20px',
+                borderTop: '1px solid var(--border-color)',
+                marginTop: '20px'
+              }}>
+                <button 
+                  type="button" 
+                  onClick={closeEditModal} 
+                  disabled={isEditing}
+                  className="btn btn-secondary"
+                  style={{
+                    padding: '10px 20px',
+                    background: 'rgba(139, 92, 246, 0.1)',
+                    color: 'var(--button-blue)',
+                    border: '2px solid rgba(139, 92, 246, 0.3)',
+                    borderRadius: 'var(--border-radius-medium)',
+                    fontSize: '0.95rem',
+                    fontWeight: '600',
+                    cursor: isEditing ? 'not-allowed' : 'pointer',
+                    transition: 'var(--transition)'
+                  }}
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={isEditing}>
-                  {isEditing ? "Saving..." : "Save"}
+                <button 
+                  type="submit" 
+                  disabled={isEditing}
+                  className="btn action-btn"
+                  style={{
+                    padding: '10px 20px',
+                    background: 'var(--gradient-primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 'var(--border-radius-medium)',
+                    fontSize: '0.95rem',
+                    fontWeight: '600',
+                    cursor: isEditing ? 'not-allowed' : 'pointer',
+                    transition: 'var(--transition)',
+                    boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  {isEditing ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Modal with Date Picker */}
+      {showApproveModal && bookToApprove && (
+        <div className="modal-overlay" onClick={closeApproveModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h4>Approve Book Request</h4>
+              <button className="close-button" onClick={closeApproveModal}>×</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ marginBottom: '16px' }}>
+                Approve request for <strong>{bookToApprove.title}</strong> by <strong>{bookToApprove.borrowerName || "Unknown"}</strong>?
+              </p>
+              <div className="modal-form-group">
+                <label htmlFor="returnDate">Return Date *</label>
+                <input
+                  type="date"
+                  id="returnDate"
+                  value={returnDate}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: 'var(--border-radius-medium)',
+                    fontSize: '1rem',
+                    marginTop: '8px'
+                  }}
+                />
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginTop: '6px' }}>
+                  Select when the borrower should return this book
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer" style={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end', 
+              gap: '12px',
+              padding: '16px 20px',
+              borderTop: '1px solid var(--border-color)'
+            }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={closeApproveModal}
+                disabled={actionLoading.id === bookToApprove.id}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn action-btn approve-btn"
+                onClick={handleApprove}
+                disabled={actionLoading.id === bookToApprove.id || !returnDate}
+              >
+                {actionLoading.id === bookToApprove.id && actionLoading.type === "approve" ? (
+                  <>
+                    <span className="button-spinner" /> Approving...
+                  </>
+                ) : (
+                  "Approve"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Request to Borrow Modal with Date Picker */}
+      {showRequestModal && bookToRequest && (
+        <div className="modal-overlay" onClick={closeRequestModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h4>Request to Borrow</h4>
+              <button className="close-button" onClick={closeRequestModal}>×</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ marginBottom: '16px' }}>
+                Request to borrow <strong>{bookToRequest.title}</strong> by <strong>{bookToRequest.author || "Unknown Author"}</strong>?
+              </p>
+              <div className="modal-form-group">
+                <label htmlFor="requestReturnDate">When will you return this book? *</label>
+                <input
+                  type="date"
+                  id="requestReturnDate"
+                  value={requestReturnDate}
+                  onChange={(e) => setRequestReturnDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: 'var(--border-radius-medium)',
+                    fontSize: '1rem',
+                    marginTop: '8px'
+                  }}
+                />
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginTop: '6px' }}>
+                  Select when you plan to return this book. The owner will see this date when reviewing your request.
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer" style={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end', 
+              gap: '12px',
+              padding: '16px 20px',
+              borderTop: '1px solid var(--border-color)'
+            }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={closeRequestModal}
+                disabled={actionLoading.id === bookToRequest.id}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn action-btn request-btn"
+                onClick={handleRequest}
+                disabled={actionLoading.id === bookToRequest.id || !requestReturnDate}
+              >
+                {actionLoading.id === bookToRequest.id && actionLoading.type === "request" ? (
+                  <>
+                    <span className="button-spinner" /> Sending...
+                  </>
+                ) : (
+                  "Send Request"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

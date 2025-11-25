@@ -18,17 +18,19 @@ import edu.cit.peerreads.backend.repository.UserRepository;
 @Configuration
 public class DataInitializer {
 
+    private static final String DEFAULT_ADMIN_EMAIL = "admin@peerreads.local";
+
     @Bean
     CommandLineRunner seedAdmin(UserRepository userRepository, BookRepository bookRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.count() > 0) {
+            if (userRepository.findByEmailIgnoreCase(DEFAULT_ADMIN_EMAIL).isPresent()) {
                 return;
             }
 
             User admin = User.builder()
                     .fullName("Peer Reads Admin")
-                    .email("admin@peerreads.local")
+                    .email(DEFAULT_ADMIN_EMAIL)
                     .username("admin")
                     .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)

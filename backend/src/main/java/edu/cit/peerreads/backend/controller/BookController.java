@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.cit.peerreads.backend.dto.ApproveRequest;
 import edu.cit.peerreads.backend.dto.BookRequest;
 import edu.cit.peerreads.backend.dto.BookResponse;
 import edu.cit.peerreads.backend.dto.BorrowRequest;
+import edu.cit.peerreads.backend.dto.UpdateReturnDateRequest;
 import edu.cit.peerreads.backend.service.BookService;
 import lombok.RequiredArgsConstructor;
 
@@ -63,8 +65,9 @@ public class BookController {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<BookResponse> approve(@PathVariable Long id) {
-        return ResponseEntity.ok(bookService.approve(id));
+    public ResponseEntity<BookResponse> approve(@PathVariable Long id,
+            @Validated @RequestBody ApproveRequest request) {
+        return ResponseEntity.ok(bookService.approve(id, request.getReturnDate()));
     }
 
     @PostMapping("/{id}/decline")
@@ -75,6 +78,17 @@ public class BookController {
     @PostMapping("/{id}/return")
     public ResponseEntity<BookResponse> returnBook(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.returnBook(id));
+    }
+
+    @PostMapping("/{id}/return-borrowed")
+    public ResponseEntity<BookResponse> returnBorrowedBook(@PathVariable Long id) {
+        return ResponseEntity.ok(bookService.returnBorrowedBook(id));
+    }
+
+    @PutMapping("/{id}/return-date")
+    public ResponseEntity<BookResponse> updateReturnDate(@PathVariable Long id,
+            @Validated @RequestBody UpdateReturnDateRequest request) {
+        return ResponseEntity.ok(bookService.updateReturnDate(id, request.getReturnDate()));
     }
 }
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Toast from "../components/Toast";
 import StorageService from "../utils/storage";
+import apiClient from "../api/client";
 import "../css/global.css";
 import "../css/Login.css"; 
 
@@ -36,35 +37,25 @@ function Login() {
     setLoading(true);
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 1500)); 
+      const response = await apiClient.post("/auth/login", {
+        usernameOrEmail: username.trim(),
+        password: password,
+      });
 
-        const user = StorageService.getUserByCredential(username.trim());
-        if (!user) {
-          showToastNotification('Account not found. Please register first.', 'error');
-          setLoading(false);
-          return;
-        }
+      StorageService.saveSession(response);
 
-        const valid = StorageService.validateUserPassword(username.trim(), password);
-        if (!valid) {
-          showToastNotification('Invalid credentials. Please check your username/email and password.', 'error');
-          setLoading(false);
-          return;
-        }
-
-        StorageService.setUserSession(user.username);
-        StorageService.saveUserProfile(user.profile || { fullName: user.fullName, email: user.email });
-
-        showToastNotification('Login successful! Welcome back.', 'success');
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 800);
-
+      showToastNotification("Login successful! Welcome back.", "success");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 800);
     } catch (error) {
-        console.error("Login Error:", error);
-        showToastNotification("An error occurred during login. Please try again.", "error");
+      console.error("Login Error:", error);
+      showToastNotification(
+        error.message || "An error occurred during login. Please try again.",
+        "error",
+      );
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
   
@@ -278,7 +269,7 @@ function Login() {
 
           <div className="demo-credentials" aria-hidden>
             <strong>Demo Credentials</strong>
-            <div className="cred-row"><span>Admin</span><code>admin@gmail.com</code><span>•</span><code>admin123</code></div>
+            <div className="cred-row"><span>Admin</span><code>admin@peerreads.local</code><span>•</span><code>admin123</code></div>
             <div className="cred-row"><span>User</span><code>user@gmail.com</code><span>•</span><code>user123</code></div>
           </div>
         </div>

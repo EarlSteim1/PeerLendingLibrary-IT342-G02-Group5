@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import MyBooks from "./pages/MyBooks";
+import Books from "./pages/Books";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -38,6 +39,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MyBooks />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/books" 
+          element={
+            <ProtectedRoute>
+              <Books />
             </ProtectedRoute>
           } 
         />

@@ -20,7 +20,9 @@ public class BookResponse {
     String borrowerEmail;
     LocalDate dateRequested;
     LocalDate dateBorrowed;
+    LocalDate dateReturn;
     LocalDate dateAdded;
     String imageUrl;
+    String genre;
 }
 

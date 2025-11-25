@@ -1,5 +1,7 @@
 package edu.cit.peerreads.backend.dto;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -13,5 +15,7 @@ public class BorrowRequest {
     @NotBlank
     @Email
     private String borrowerEmail;
+    
+    private LocalDate returnDate;
 }
 

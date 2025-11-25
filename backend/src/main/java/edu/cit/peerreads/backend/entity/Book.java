@@ -43,11 +43,17 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private BookStatus status = BookStatus.AVAILABLE;
 
+    @Enumerated(EnumType.STRING)
+    private Genre genre;
+
     private String borrowerName;
     private String borrowerEmail;
     private LocalDate dateRequested;
     private LocalDate dateBorrowed;
+    private LocalDate dateReturn;
     private LocalDate dateAdded;
+    
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.cit.peerreads.backend.dto.ProfileUpdateRequest;
 import edu.cit.peerreads.backend.dto.UserDto;
+import edu.cit.peerreads.backend.entity.Role;
 import edu.cit.peerreads.backend.entity.User;
 import edu.cit.peerreads.backend.exception.BadRequestException;
 import edu.cit.peerreads.backend.exception.ResourceNotFoundException;
@@ -66,6 +67,34 @@ public class UserService {
 
         userRepository.save(user);
         return toDto(user);
+    }
+
+    public boolean isCurrentUserAdmin() {
+        User currentUser = getCurrentUser();
+        return currentUser.getRole() == Role.ADMIN;
+    }
+
+    public boolean hasAnyAdmin() {
+        return userRepository.existsByRole(Role.ADMIN);
+    }
+
+    @Transactional
+    public UserDto promoteToAdmin(String emailOrUsername) {
+        // Find user by email or username
+        User userToPromote = userRepository.findByEmailIgnoreCase(emailOrUsername)
+                .or(() -> userRepository.findByUsernameIgnoreCase(emailOrUsername))
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email or username: " + emailOrUsername));
+
+        // Check if user is already admin
+        if (userToPromote.getRole() == Role.ADMIN) {
+            throw new BadRequestException("User is already an administrator");
+        }
+
+        // Promote to admin
+        userToPromote.setRole(Role.ADMIN);
+        userRepository.save(userToPromote);
+
+        return toDto(userToPromote);
     }
 }
 
