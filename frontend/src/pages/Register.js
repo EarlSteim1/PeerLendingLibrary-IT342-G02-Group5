@@ -4,8 +4,8 @@ import { useNavigate, Link } from "react-router-dom";
 import Toast from "../components/Toast";
 import StorageService from "../utils/storage";
 import apiClient from "../api/client";
-import "../css/global.css"; 
-import "../css/Login.css"; 
+import "../css/global.css";
+import "../css/Login.css";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -123,132 +123,129 @@ function Register() {
         onClose={() => setShowToast(false)} 
       />
       {/* Top-left book icon for branding */}
-       <div className="app-top-left-icon" aria-hidden="true">
+      <div className="app-top-left-icon" aria-hidden="true">
         <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book icon" />
         <span className="app-brand-text">PEER READS</span>
       </div>
-      
-        <div className="login-container">
-          {/* LEFT SIDE: Register Illustration */}
-          <div className="left register-left">
-            <img
-              src="https://via.placeholder.com/400x250/f7faff?text=Community+Illustration"
-              alt="Community illustration"
-              className="illustration"
-              style={{marginBottom: '50px'}} 
-            />
-            
-            <div className="logo" style={{position: 'relative', top: 'auto', left: 'auto', marginTop: '20px'}}>
-              <h1></h1>
-            </div>
-          </div>
-          
-          {/* RIGHT SIDE: Register Form */}
-          <div className="right">
-            <div className="form-box">
-              <h2>Join Peer Reads</h2>
-              <form onSubmit={handleSubmit}>
-                
-                {/* Full Name */}
-                <div className="input-group" style={inputGroupStyle}>
-                    <input 
-                      name="name" 
-                      type="text" 
-                      placeholder="Full Name" 
-                      value={formData.name}
-                      onChange={handleChange} 
-                      disabled={loading}
-                      className={errors.name ? 'input-error' : ''}
-                    />
-                    {errors.name && <span className="error-message">{errors.name}</span>}
-                </div>
-
-                {/* Removed role selection - sign up defaults to 'user' */}
-
-                {/* Email */}
-                <div className="input-group" style={inputGroupStyle}>
-                    <input 
-                      name="email" 
-                      type="email" 
-                      placeholder="Email" 
-                      value={formData.email}
-                      onChange={handleChange} 
-                      disabled={loading}
-                      className={errors.email ? 'input-error' : ''}
-                    />
-                    {errors.email && <span className="error-message">{errors.email}</span>}
-                </div>
-                
-                {/* Confirm Email */}
-                <div className="input-group" style={inputGroupStyle}>
-                    <input 
-                      name="confirmEmail" 
-                      type="email" 
-                      placeholder="Confirm Email" 
-                      value={formData.confirmEmail}
-                      onChange={handleChange} 
-                      disabled={loading}
-                      className={errors.confirmEmail ? 'input-error' : ''}
-                    />
-                    {errors.confirmEmail && <span className="error-message">{errors.confirmEmail}</span>}
-                </div>
-                
-                {/* Password */}
-                <div className="input-group" style={inputGroupStyle}>
-                    <input 
-                      name="password" 
-                      type="password" 
-                      placeholder="Password" 
-                      value={formData.password}
-                      onChange={handleChange} 
-                      disabled={loading}
-                      className={errors.password ? 'input-error' : ''}
-                    />
-                    {errors.password && <span className="error-message">{errors.password}</span>}
-                </div>
-
-                {/* Confirm Password */}
-                <div className="input-group" style={inputGroupStyle}>
-                    <input 
-                      name="confirmPassword" 
-                      type="password" 
-                      placeholder="Confirm Password" 
-                      value={formData.confirmPassword}
-                      onChange={handleChange} 
-                      disabled={loading}
-                      className={errors.confirmPassword ? 'input-error' : ''}
-                    />
-                    {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-                </div>
-                
-                <button 
-                  type="submit" 
-                  className="login-button" 
-                  disabled={loading}
-                  style={{
-                    width: "100%",
-                    padding: "12px 16px",
-                    backgroundColor: "#007bff",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    marginTop: "8px",
-                    cursor: loading ? "not-allowed" : "pointer",
-                    display: "block",
-                  }}
-                >
-                  {loading ? 'Signing Up...' : 'Sign Up'}
-                </button>
-                <p className="link-text" style={{textAlign: 'center', fontSize: '15px'}}>
-                  Already have a account? <Link to="/">Log In</Link>
-                </p>
-             
-              </form>
-            </div>
+      <div className="login-container">
+        {/* LEFT SIDE: Register Illustration + message */}
+        <div className="left register-left">
+          <div className="login-overlay" />
+          <div className="left-content">
+            <h1>Create your reading circle</h1>
+            <p>
+              Build your personal shelf, connect with peers, and never let a
+              great book gather dust again.
+            </p>
           </div>
         </div>
+
+        {/* RIGHT SIDE: Register Form */}
+        <div className="right">
+          <div className="form-box">
+            <h2>Join Peer Reads</h2>
+            <p className="auth-subtitle">
+              A few quick details and you’ll be ready to borrow and share books.
+            </p>
+            <form onSubmit={handleSubmit} className="register-form">
+              {/* Full Name */}
+              <div className="input-group" style={inputGroupStyle}>
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className={errors.name ? "input-error" : ""}
+                />
+                {errors.name && (
+                  <span className="error-message">{errors.name}</span>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="input-group" style={inputGroupStyle}>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className={errors.email ? "input-error" : ""}
+                />
+                {errors.email && (
+                  <span className="error-message">{errors.email}</span>
+                )}
+              </div>
+
+              {/* Confirm Email */}
+              <div className="input-group" style={inputGroupStyle}>
+                <input
+                  name="confirmEmail"
+                  type="email"
+                  placeholder="Confirm Email"
+                  value={formData.confirmEmail}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className={errors.confirmEmail ? "input-error" : ""}
+                />
+                {errors.confirmEmail && (
+                  <span className="error-message">
+                    {errors.confirmEmail}
+                  </span>
+                )}
+              </div>
+
+              {/* Password */}
+              <div className="input-group" style={inputGroupStyle}>
+                <input
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className={errors.password ? "input-error" : ""}
+                />
+                {errors.password && (
+                  <span className="error-message">{errors.password}</span>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="input-group" style={inputGroupStyle}>
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className={errors.confirmPassword ? "input-error" : ""}
+                />
+                {errors.confirmPassword && (
+                  <span className="error-message">
+                    {errors.confirmPassword}
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="primary-btn"
+                disabled={loading}
+              >
+                {loading ? "Signing Up..." : "Sign Up"}
+              </button>
+              <p className="link-text">
+                Already have an account? <Link to="/">Log In</Link>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

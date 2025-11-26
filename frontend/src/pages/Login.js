@@ -4,7 +4,7 @@ import Toast from "../components/Toast";
 import StorageService from "../utils/storage";
 import apiClient from "../api/client";
 import "../css/global.css";
-import "../css/Login.css"; 
+import "../css/Login.css";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -64,68 +64,39 @@ function Login() {
   };
 
   return (
-    <div
-      className="login-container"
-      style={{
-        display: "flex",
-        height: "100vh",
-        width: "100vw",
-        margin: 0,
-        padding: 0,
-        overflow: "hidden",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      }}
-    >
+    <div className="centered-page-wrapper">
       {/* Top-left book icon + brand text */}
-         <div className="app-top-left-icon" aria-hidden="true">
-        <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Book icon" />
+      <div className="app-top-left-icon" aria-hidden="true">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/29/29302.png"
+          alt="Book icon"
+        />
         <span className="app-brand-text">PEER READS</span>
       </div>
-      
-      {/* LEFT SIDE */}
-      <div
-        className="left login-left"
-        style={{
-          flex: 1,
-          height: "100%",
-          backgroundColor: "#f7faff",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "40px",
-          boxSizing: "border-box",
-        }}
-      >
-        <div
-          className="logo"
-          style={{ marginBottom: "30px", textAlign: "center", color: "#2ecc71" }}
-        >
-          <h1 style={{ margin: 0 }}></h1>
+
+      <div className="login-container">
+        {/* LEFT SIDE */}
+        <div className="left login-left">
+          <div className="login-overlay" />
+          <div className="left-content">
+            <h1>Borrow, Share, Discover.</h1>
+            <p>
+              Join a community-powered library. Lend your books, track your
+              reads, and discover titles from people around you.
+            </p>
+          </div>
         </div>
-        <h3 style={{ color: "#555", textAlign: "center" }}>
-   
-        </h3>
-      </div>
 
-      {/* RIGHT SIDE */}
-      <div
-        className="right"
-        style={{
-          flex: 1,
-          height: "100%",
-          overflowY: "auto",
-          padding: "60px 80px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <div className="form-box" style={{ width: "100%", margin: "0 auto" }}>
-          <h2 style={{ marginBottom: "30px", textAlign: "center" }}>Welcome Back</h2>
+        {/* RIGHT SIDE */}
+        <div className="right">
+          <div className="form-box">
+            <h2>Welcome back</h2>
+            <p className="auth-subtitle">
+              Sign in to your personal lending library and pick up where you left off.
+            </p>
 
-          <form onSubmit={handleStandardSubmit} id="login-form">
-            <div className="input-group" style={{ marginBottom: "20px", position: "relative" }}>
+            <form onSubmit={handleStandardSubmit} id="login-form">
+              <div className="input-group">
               <input
                 type="text"
                 placeholder="Username"
@@ -133,31 +104,10 @@ function Login() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "12px 40px 12px 14px",
-                  fontSize: "16px",
-                  borderRadius: "6px",
-                  border: "1px solid #ccc",
-                }}
               />
-              <span
-                className="input-icon"
-                style={{
-                  position: "absolute",
-                  right: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "18px",
-                  color: "#888",
-                  userSelect: "none",
-                }}
-              >
-                
-              </span>
-            </div>
+              </div>
 
-            <div className="input-group" style={{ marginBottom: "20px", position: "relative" }}>
+              <div className="input-group">
               <input
                 type="password"
                 placeholder="Password"
@@ -165,118 +115,75 @@ function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "12px 40px 12px 14px",
-                  fontSize: "16px",
-                  borderRadius: "6px",
-                  border: "1px solid #ccc",
-                }}
               />
-              <span
-                className="input-icon"
-                style={{
-                  position: "absolute",
-                  right: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "18px",
-                  color: "#888",
-                  userSelect: "none",
-                }}
-              >
-                
-              </span>
-            </div>
+              </div>
 
-            <div className="remember" style={{ marginBottom: "25px" }}>
+              <div className="remember">
               <input
                 type="checkbox"
                 id="remember"
                 disabled={loading}
-                style={{ marginRight: "8px" }}
               />
               <label htmlFor="remember" style={{ userSelect: "none" }}>
                 Remember me
               </label>
+              </div>
+            </form>
+
+            <div className="auth-button-row">
+              <button
+                type="submit"
+                form="login-form"
+                disabled={loading}
+                className="primary-btn"
+              >
+                {loading ? "Logging In..." : "Log In"}
+              </button>
+
+              <div className="auth-divider">
+                <span>or continue with</span>
+              </div>
+
+              <button
+                type="button"
+                className="google-login-btn"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                  alt="Google logo"
+                  style={{ width: "18px", height: "18px" }}
+                />
+                Google
+              </button>
             </div>
-          </form>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "15px",
-              marginBottom: "20px",
-            }}
-          >
-            <button
-              type="submit"
-              form="login-form"
-              disabled={loading}
-              style={{
-                flex: 1,
-                padding: "12px 14px",
-                fontSize: "16px",
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.7 : 1,
-                borderRadius: "6px",
-                border: "none",
-                backgroundColor: "#007bff",
-                color: "white",
-                fontWeight: "600",
-                transition: "background-color 0.3s ease",
-              }}
-              onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = "#007bff")}
-              onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = "#007bff")}
-            >
-              {loading ? "Logging In..." : "Log In"}
-            </button>
+            <p className="link-text">
+              Don’t have an account? <Link to="/register">Register</Link>
+            </p>
 
-            <button
-              type="button"
-              className="google-login-btn"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              style={{
-                flex: 1,
-                padding: "12px 14px",
-                fontSize: "16px",
-                background: "white",
-                color: "var(--text-dark, #333)",
-                border: "1px solid #ccc",
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.7 : 1,
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                fontWeight: "600",
-              }}
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                alt="Google logo"
-                style={{ width: "18px", height: "18px" }}
-              />
-              Google
-            </button>
-          </div>
-
-          <p className="link-text" style={{ textAlign: "center", marginBottom: "25px" }}>
-            Don’t have an account? <Link to="/register">Register</Link>
-          </p>
-
-          <div className="demo-credentials" aria-hidden>
-            <strong>Demo Credentials</strong>
-            <div className="cred-row"><span>Admin</span><code>admin@peerreads.local</code><span>•</span><code>admin123</code></div>
-            <div className="cred-row"><span>User</span><code>user@gmail.com</code><span>•</span><code>user123</code></div>
+            <div className="demo-credentials" aria-hidden>
+              <strong>Demo Credentials</strong>
+              <div className="cred-row">
+                <span>Admin</span>
+                <code>admin@peerreads.local</code>
+                <span>•</span>
+                <code>admin123</code>
+              </div>
+              <div className="cred-row">
+                <span>User</span>
+                <code>user@gmail.com</code>
+                <span>•</span>
+                <code>user123</code>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Toast Notification */}
-      <Toast  
+      <Toast
         message={toastMessage}
         type={toastType}
         show={showToast}

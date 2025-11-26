@@ -2,5 +2,13 @@
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 14px;
+}
+
+.register-form .input-group {
+  margin-bottom: 6px;
+}
+
+.register-form .primary-btn {
+  margin-top: 8px;
 }
