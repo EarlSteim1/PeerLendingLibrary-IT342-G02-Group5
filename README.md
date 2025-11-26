@@ -6,7 +6,7 @@ Frontend: HTML, CSS, JavaScript
 
 Frontend: React
 
-Backend: Sprintboot
+Backend: Springboot
 
 Database: MySQL
 
@@ -34,7 +34,11 @@ Dependencies:
 ✅ Spring Web
 ✅ Spring Data JPA
 ✅ MySQL Driver
-✅ Spring Boot DevTools (optional)
+✅ Spring Boot DevTools
+✅ Sprint Security
+✅ Validation
+✅ Lombok
+
 
 Download and unzip the project, then place it inside backend/.
 
@@ -60,7 +64,7 @@ Step 4: Run the Spring Boot server
 In VS Code terminal:
 
 cd backend
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 
 
 ✅ The backend will run at:
@@ -122,7 +126,7 @@ Start MySQL Server
 Run Backend:
 
 cd backend
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 
 
 → http://localhost:8080
@@ -159,6 +163,7 @@ GitLens
 
 ## 👥 Team Members
     Bebiro, Ryan –  ryan.bebiro@cit.edu
-	Dinapo, Nash -	alexandreinash.dinapo@cit.edu
-	Azcona, Jeffer – jeffer.azcona@cit.edu
+	Dinapo, Alexandrei Nash -	alexandreinash.dinapo@cit.edu
+	Azcona, Jeffer - jeffer.azcona@cit.edu
 	Sagaral, Earl Jericho - earljericho.sagaral@cit.edu
+	
